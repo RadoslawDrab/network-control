@@ -1,0 +1,9 @@
+{
+  "name": "control",
+  "version": "0.0.1",
+  "description": "Server app for controlling network devices",
+  "main": "index.ts",
+  "scripts": {},
+  "author": "Radosław Drab",
+  "license": "ISC"
+}
