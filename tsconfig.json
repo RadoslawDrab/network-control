@@ -4,6 +4,7 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": "./src"
   }
 }
