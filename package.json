@@ -7,14 +7,18 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "tsx --watch src/index.ts",
+    "prebuild": "shx rm -rf dist/ && npm run type-check",
     "build": "node esbuild.mjs",
-    "prebuild": "npm run type-check",
+    "postbuild": "npm run build-exe && shx rm sea-prep.blob",
+    "build-exe": "node --experimental-sea-config sea-config.json && node build-exe.mjs && postject dist/index.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 ",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "concurrently": "^8.2.2",
     "esbuild": "^0.23.0",
+    "postject": "^1.0.0-alpha.6",
+    "shx": "^0.3.4",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
   }

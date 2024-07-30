@@ -6,4 +6,5 @@ await esbuild.build({
   outfile: 'dist/index.js',
   treeShaking: true,
   platform: 'node',
+  minify: true,
 });
