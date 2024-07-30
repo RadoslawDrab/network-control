@@ -1,7 +1,9 @@
 {
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./env.d.ts"],
+  "exclude": ["node_modules/"],
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
     "baseUrl": "./src"
   }
 }
