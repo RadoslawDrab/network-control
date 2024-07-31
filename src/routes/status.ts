@@ -97,7 +97,7 @@ export default (config: AppConfig) => {
         ],
       });
 
-      setStatus(res, { code: 200, message: `${changeTime < 0 ? 'Removed' : addTime ? 'Added' : 'Changed'} time` });
+      setStatus(res, { code: 201, message: `${changeTime < 0 ? 'Removed' : addTime ? 'Added' : 'Changed'} time` });
     });
 
   return router;
