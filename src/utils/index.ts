@@ -25,6 +25,14 @@ export function getAddresses(req: Request) {
   if (!isValid) throw getStatus(400, 'No valid MAC address');
   return addresses.filter(macFilter);
 }
+export function checkAdmin(req: Request, config: AppConfig) {
+  const addresses = getAddresses(req);
+  const { adminAddresses } = config.get();
+
+  if (!adminAddresses || adminAddresses.length === 0) throw getStatus(401);
+
+  return addresses.filter((addr) => adminAddresses.includes(addr)).length > 0;
+}
 export function checkAddressesValidity(addresses: string | string[]): [boolean, (address: string) => boolean] {
   const macRegEx = new RegExp(/[0-9A-FX]{12}/i);
   const macFilter = (addr: string) => !!addr.match(macRegEx);
