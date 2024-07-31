@@ -1,6 +1,7 @@
 import { Request } from 'express';
 
 import { getStatus } from './server';
+import { AppConfig } from 'types';
 
 export function standarizeAddresses(
   addresses: string[],
