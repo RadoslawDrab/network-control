@@ -2,6 +2,14 @@ import { Request } from 'express';
 
 import { getStatus } from './server';
 
+export function standarizeAddresses(
+  addresses: string[],
+  filterCallback?: (value: string, index: number, array: string[]) => boolean
+): string[] {
+  return addresses
+    .map((addr) => addr.replace(/\W/g, '').toUpperCase())
+    .filter((value, index, array) => (filterCallback ? filterCallback(value, index, array) : true));
+}
 export function getAddresses(req: Request) {
   const address = req.headers['mac_address'];
   const errorStatus = getStatus(400, 'MAC address is required');
