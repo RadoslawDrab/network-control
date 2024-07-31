@@ -26,3 +26,10 @@ export function getAddresses(req: Request) {
   if (!addresses.find(macFilter)) throw getStatus(400, 'No valid MAC address');
   return addresses.filter(macFilter);
 }
+export function checkAddressesValidity(addresses: string | string[]): [boolean, (address: string) => boolean] {
+  const macRegEx = new RegExp(/[0-9A-FX]{12}/i);
+  const macFilter = (addr: string) => !!addr.match(macRegEx);
+  const addr = Array.isArray(addresses) ? addresses : [addresses];
+
+  return [!!addr.find(macFilter), macFilter];
+}
