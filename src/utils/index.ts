@@ -8,7 +8,7 @@ export function standarizeAddresses(
   filterCallback?: (value: string, index: number, array: string[]) => boolean
 ): string[] {
   return addresses
-    .map((addr) => addr.replace(/\W/g, '').toUpperCase())
+    .map((addr) => addr.replace(/\W/g, '').replace(/^0x/, '0').toUpperCase())
     .filter((value, index, array) => (filterCallback ? filterCallback(value, index, array) : true));
 }
 export function getAddresses(req: Request) {
