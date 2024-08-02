@@ -1,7 +1,8 @@
 import esbuild from 'esbuild';
 
+const variables = ['NODE_ENV'];
 const envVariables = Object.keys(process.env)
-  .filter((key) => key.startsWith('_'))
+  .filter((key) => key.startsWith('_') || variables.includes(key))
   .reduce((obj, key) => ({ ...obj, ['process.env.' + key]: `"${process.env[key]}"` }), {});
 
 await esbuild.build({
