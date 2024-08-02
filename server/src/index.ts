@@ -25,7 +25,14 @@ const serverAddresses = standarizeAddresses(
 
 const config = new Config<Settings>(
   'data',
-  { appName: 'network-controller', addresses: [], adminAddresses: [...serverAddresses] },
+  {
+    appName: 'network-controller',
+    addresses: [],
+    adminAddresses: [...serverAddresses],
+    showTimeInfoTill: 0,
+    reminderTime: 5 * 60,
+    showTimeInfoDuration: 10,
+  },
   process.env._ENC_KEY ?? 'data'
 );
 
