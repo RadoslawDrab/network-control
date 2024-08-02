@@ -1,82 +1,28 @@
 import requests
-import pynput
 import re
-import psutil
-import tkinter
-import threading
-from multiprocessing import Process
+import window as w
 from time import sleep
+from utils import runInParallel
+from customIO import getMac, setKeyboardBlock, setMouseBlock
 
 iterate = True
 interval = 1
 includeInterfaces: list[str] = []
 
-keyboardListener = pynput.keyboard.Listener(suppress=True)
-mouseListener = pynput.mouse.Listener(suppress=True)
-threads: list[threading.Thread] = []
+window = w.createBlockInfo()
 
-root = tkinter.Tk()
-root.title('ALERT')
-root.configure(padx=100, pady=100)
-root.attributes('-fullscreen', True)
-root.attributes("-topmost", True)
-
-group = tkinter.Frame(root)
-tkinter.Label(group, text='Komputer zablokowany', font=('TkDefaultFont', 35, 'bold')).pack()
-tkinter.Label(group, text='Skontaktuj się z bibliotekarzem dyżurnym, aby odblokować', font=('TkDefaultFont', 20), pady=30 ).pack()
-group.pack(expand=True)
-
-def getMac(include: list[str] = []):
-  addresses: list[str] = []
-  for interface in psutil.net_if_addrs():
-    address = psutil.net_if_addrs()[interface][0].address
-    if len(include) > 0:
-      if not any(re.match(inclusion, interface) for inclusion in include): continue
-      addresses += [address]
-    else:
-      addresses += [address]  
-  return addresses
-def setMouseBlock(block: bool):
-    global mouseListener
-    if block:
-      if not mouseListener.running:
-        mouseListener = pynput.mouse.Listener(suppress=True)
-        mouseListener.start()
-    else:
-      if mouseListener.running:
-        mouseListener.stop()
-def setKeyboardBlock(block: bool):
-    global keyboardListener
-    if block:
-      if not keyboardListener.running:
-        keyboardListener = pynput.keyboard.Listener(suppress=True)
-        keyboardListener.start()
-    else:
-      if keyboardListener.running:
-        keyboardListener.stop()
 
 def setError(error: str, type: str = 'ERROR', time: int = 5):
   global iterate
-  root.withdraw()
-  root.quit()
+  window.remove()
   print(f"{type}: {error}")
   iterate = False
   sleep(time)
 
-def runInParallel(*fns):
-  # proc = []
-  global threads
-  if __name__ == "__main__":
-    for fn in fns:
-      thread = threading.Thread(target=fn)
-      thread.start()
-      threads.append(thread)
-    # for thread in thread:
-    #   thread.join()
-  return threads
-
 def init():
   global includeInterfaces
+  createdInfo = False
+  
   try:
     file = open('./interfaces.txt', 'r')
     lines = file.readlines()
@@ -94,21 +40,26 @@ def init():
         response = requests.get('http://172.30.240.83:3000/api/status/' + addresses[0])
         data: dict = response.json() 
         isLocked = data.get('isLocked')
+        timeInfo = data.get('timeInfo')
+        remainingSeconds = data.get('remainingSeconds')
+        remainingTime = 0
+        if remainingSeconds != None:
+          remainingTime = round(remainingSeconds / 60)
+
+        print(timeInfo, createdInfo)
+        if timeInfo and not createdInfo:
+          w.createTimeInfo(remainingTime)
+          createdInfo = True
+        elif not timeInfo and createdInfo:
+          createdInfo = False
 
         if isLocked != None: 
           setKeyboardBlock(isLocked)
           setMouseBlock(isLocked)
 
+          window.setState(isLocked)
           if not isLocked:
             print(data.get('remainingSeconds'))
-            root.withdraw()
-          else:
-            root.deiconify()
-            root.focus_set()
-            root.lift()
-            # if not windowThread.is_alive():
-            #   windowThread.start()
-            # runInParallel(showWindow)
         else:
           raise Exception(f"MAC address '{addresses[0]}' not registered")
       else:
@@ -120,5 +71,9 @@ def init():
     except Exception as error:
       setError(error)
 
+
 runInParallel(init)
-root.mainloop()
+# w.createTimeInfo(0)
+# window.show()
+# window.root.mainloop()
+window.start(False)
