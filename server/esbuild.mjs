@@ -11,5 +11,6 @@ await esbuild.build({
   outfile: 'dist/index.cjs',
   treeShaking: true,
   platform: 'node',
+  minify: true,
   define: envVariables,
 });
