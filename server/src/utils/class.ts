@@ -18,7 +18,7 @@ export class Config<T extends ConfigType> {
 
     this.name = fileName.replace('.conf', '');
     this.fileName = this.name + '.conf';
-    this.path = (isProduction ? './' : './dist/') + this.fileName;
+    this.path = path.resolve((isProduction ? './' : './dist/') + this.fileName);
     this.key = key;
     this.restartRequired = false;
 
@@ -61,7 +61,7 @@ export class Config<T extends ConfigType> {
   }
   configExists(): boolean {
     try {
-      fs.readFileSync(path.resolve(this.path)).toString();
+      fs.readFileSync(this.path).toString();
       return true;
     } catch (error) {
       return false;
@@ -69,7 +69,7 @@ export class Config<T extends ConfigType> {
   }
   private writeFile(data: MaybePartial<T>, restartRequired: boolean = false) {
     fs.writeFile(
-      path.resolve(this.path),
+      this.path,
       this.encrypt(data),
       {
         encoding: 'utf8',
@@ -87,7 +87,7 @@ export class Config<T extends ConfigType> {
   private decrypt(): MaybePartial<T> {
     if (this.configExists()) {
       try {
-        const str = fs.readFileSync(path.resolve(this.path)).toString();
+        const str = fs.readFileSync(this.path).toString();
         return str ? (JSON.parse(crypto.AES.decrypt(str, this.key).toString(crypto.enc.Utf8)) as T) : {};
       } catch (error) {
         return this.defaultData;
