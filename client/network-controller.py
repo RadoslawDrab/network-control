@@ -46,7 +46,6 @@ def init():
         if remainingSeconds != None:
           remainingTime = round(remainingSeconds / 60)
 
-        print(timeInfo, createdInfo)
         if timeInfo and not createdInfo:
           w.createTimeInfo(remainingTime)
           createdInfo = True
