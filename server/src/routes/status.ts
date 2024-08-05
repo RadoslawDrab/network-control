@@ -26,12 +26,21 @@ export default (config: AppConfig) => {
 
     // Longest lock time
     const lockTime = Math.max(...lockTimes);
+    const remainingSeconds = Math.max(Math.round((lockTime - currentTime) / 1000), 0);
+    const isLocked = currentTime >= lockTime;
+    const showTimeInfo =
+      Math.max(Math.round(config.get().showTimeInfoTill ?? 0) - currentTime, 0) > 0 && remainingSeconds > 0;
+
+    const remindAfter = remainingSeconds < (config.get().reminderTime ?? 5 * 60);
+    const endRemind =
+      remainingSeconds < (config.get().reminderTime ?? 5 * 60) - (config.get().showTimeInfoDuration ?? 10);
 
     res.status(200).json({
       lockAfter: lockTime,
-      isLocked: currentTime >= lockTime,
+      isLocked,
       requestTime: currentTime,
-      remainingSeconds: Math.max(Math.round((lockTime - currentTime) / 1000), 0),
+      remainingSeconds,
+      timeInfo: (!isLocked && remindAfter && !endRemind) || showTimeInfo,
     });
   });
   router
