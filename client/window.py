@@ -46,12 +46,20 @@ def createTimeInfo(minutes: int):
   hours = math.floor(minutes / 60)
   time = minutes
   note = 'minut'
-  if hours == 1:
-    note = 'godzina'
+
+  if minutes == 1:
+    note = 'minuta'
+  elif minutes > 1 and minutes < 5:
+    note = 'minuty'
+
+  if hours > 0:
     time = hours
-  elif hours > 1:
-    note = 'godzin'
-    time = hours
+    if hours == 1:
+      note = 'godzina'
+    elif hours > 1 and hours < 5:
+      note = 'godziny'
+    else:
+      note = 'godzin' 
   notify('INFORMACJA', f'Pozostało: {time} {note} do końca czasu', duration='long', scenario='urgent')
 
   # window = Window('info', master)
