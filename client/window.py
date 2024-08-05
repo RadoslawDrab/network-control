@@ -62,8 +62,3 @@ def createTimeInfo(minutes: int):
       note = 'godzin' 
   notify('INFORMACJA', f'Pozostało: {time} {note} do końca czasu', duration='long', scenario='urgent')
 
-  # window = Window('info', master)
-  # window.root.title('INFORMACJA')
-  # window.root.configure(padx=35, pady=50)
-  # tkinter.Label(window.root, text=, font=('TKDefaultFont', 15, 'bold')).pack()
-
