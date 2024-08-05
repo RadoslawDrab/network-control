@@ -7,9 +7,11 @@
   "main": "dist/index.cjs",
   "type": "module",
   "scripts": {
-    "start": "dotenvx run -f .env.dev -- tsx --watch src/index.ts",
+    "start": "dotenvx run -f .env.dev -- concurrently --names=\"SERVER,WATCH\" -c \"auto\" \"npm run start:server\" \"npm run build:app\"",
+    "start:server": "dotenvx run -f .env.dev -- tsx --watch src/index.ts",
     "prebuild": "shx rm -rf dist/ && npm run type-check",
-    "build": "dotenvx run -f .env.prod -- node esbuild.mjs",
+    "build": "dotenvx run -f .env.prod -- node esbuild.mjs && node app/esbuild.mjs",
+    "build:app": "node app/esbuild.mjs --watch",
     "postbuild": "npm run build-exe && shx rm sea-prep.blob",
     "build-exe": "node --experimental-sea-config sea-config.json && node -e \"require('fs').copyFileSync(process.execPath, 'dist/index.exe')\" && postject dist/index.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
     "type-check": "tsc --noEmit"
@@ -22,10 +24,12 @@
     "concurrently": "^8.2.2",
     "crypto-js": "^4.2.0",
     "esbuild": "^0.23.0",
+    "esbuild-plugin-vue3": "^0.4.2",
     "express": "^4.19.2",
     "postject": "^1.0.0-alpha.6",
     "shx": "^0.3.4",
     "tsx": "^4.16.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vue": "^3.4.35"
   }
 }

@@ -1,5 +1,6 @@
 import express from 'express';
 import os from 'os';
+import path from 'path';
 
 import { Config } from 'utils/class';
 
@@ -12,6 +13,7 @@ import { standarizeAddresses } from 'utils';
 
 const PORT = process.env._PORT || 3000;
 const HOSTNAME = process.env._HOSTNAME || '127.0.0.1';
+const PRODUCTION = process.env.NODE_ENV === 'production';
 const app = express();
 
 const networkInterfaces = os.networkInterfaces();
@@ -38,15 +40,16 @@ const config = new Config<Settings>(
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log(config.get());
-  console.log(req.originalUrl, req.headers, req.body);
-
-  next();
-});
 app.use('/api/status', status(config));
 app.use('/api/admin', admin(config));
 app.use('/api/user', user(config));
+
+if (PRODUCTION) app.use('/', express.static(path.resolve('app')));
+else {
+  app.get('/', (req, res) => res.sendFile('app/index.html'));
+  app.get('/main.js', (req, res) => res.sendFile('dist/app/main.js'));
+  app.get('/:file', express.static('app/public'));
+}
 
 app.listen(PORT, HOSTNAME, () => {
   console.clear();
