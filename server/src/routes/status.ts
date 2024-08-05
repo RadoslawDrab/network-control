@@ -37,6 +37,11 @@ export default (config: AppConfig) => {
   router
     .use(checkAddress)
     .use(checkAdmin.bind(config))
+    .post('/', (req, res) => {
+      const currentTime = Date.now();
+      config.set({ showTimeInfoTill: currentTime + (config.get().showTimeInfoDuration ?? 1) * 1000 });
+      setStatus(res, { code: 200, message: 'Time info set' });
+    })
     .post('/:address', (req, res) => {
       const currentTime = Date.now();
 
