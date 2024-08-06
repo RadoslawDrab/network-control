@@ -45,11 +45,6 @@ app.use('/api/admin', admin(config));
 app.use('/api/user', user(config));
 
 if (PRODUCTION) app.use('/', express.static(path.resolve('app')));
-else {
-  app.get('/', (req, res) => res.sendFile('app/index.html'));
-  app.get('/main.js', (req, res) => res.sendFile('dist/app/main.js'));
-  app.get('/:file', express.static('app/public'));
-}
 
 app.listen(PORT, HOSTNAME, () => {
   console.clear();
