@@ -1,5 +1,9 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vueJsx from '@vitejs/plugin-vue-jsx';
+import Components from 'unplugin-vue-components/vite';
+import { BootstrapVueNextResolver } from 'bootstrap-vue-next';
+
 import path from 'path';
 import * as fs from 'fs';
 
@@ -7,7 +11,15 @@ const currentPath = (...str: string[]) => path.join(process.cwd(), 'app', ...str
 export default defineConfig({
   appType: 'spa',
   publicDir: 'app/public',
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    vueJsx(),
+    Components({
+      dts: true,
+      dirs: ['./src/components'],
+      resolvers: [BootstrapVueNextResolver()],
+    }),
+  ],
   root: currentPath(),
   build: {
     outDir: path.join(process.cwd(), 'dist/app'),
