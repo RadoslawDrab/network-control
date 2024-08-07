@@ -8,6 +8,7 @@ import { Config } from 'utils/class';
 import status from 'routes/status';
 import admin from 'routes/admin';
 import user from 'routes/user';
+import login from 'routes/login';
 
 import { Settings } from 'types/index';
 import { standarizeAddresses } from 'utils';
@@ -35,16 +36,18 @@ const config = new Config<Settings>(
     showTimeInfoTill: 0,
     reminderTime: 5 * 60,
     showTimeInfoDuration: 10,
+    adminPassword: process.env._ADMIN_PASSWORD,
   },
   process.env._ENC_KEY ?? 'data'
 );
 
 app.use(express.json());
-app.use(cors({ origin: [`http://${HOSTNAME}:${PORT}`, `http://${HOSTNAME}:3001`] }));
+app.use(cors({ origin: [`http://${HOSTNAME}:${PORT}`, `http://localhost:3001`] }));
 
 app.use('/api/status', status(config));
 app.use('/api/admin', admin(config));
 app.use('/api/user', user(config));
+app.use('/api/login', login(config));
 
 if (PRODUCTION) app.use('/', express.static(path.resolve('app')));
 
