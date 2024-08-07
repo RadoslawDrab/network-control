@@ -21,6 +21,9 @@ export default defineConfig({
     }),
   ],
   root: currentPath(),
+  server: {
+    port: 3001,
+  },
   build: {
     outDir: path.join(process.cwd(), 'dist/app'),
     minify: true,
