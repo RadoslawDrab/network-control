@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import os from 'os';
 import path from 'path';
 
@@ -39,6 +40,7 @@ const config = new Config<Settings>(
 );
 
 app.use(express.json());
+app.use(cors({ origin: [`http://${HOSTNAME}:${PORT}`, `http://${HOSTNAME}:3001`] }));
 
 app.use('/api/status', status(config));
 app.use('/api/admin', admin(config));
@@ -49,6 +51,4 @@ if (PRODUCTION) app.use('/', express.static(path.resolve('app')));
 app.listen(PORT, HOSTNAME, () => {
   console.clear();
   console.log(`Listening on http://${HOSTNAME}:${PORT}`);
-
-  console.log(config.get());
 });
