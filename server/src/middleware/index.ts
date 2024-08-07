@@ -25,3 +25,10 @@ export function checkAdmin(this: AppConfig, req: express.Request, res: express.R
     setStatus(res, error as Status);
   }
 }
+export function checkToken(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (req.headers['token']) {
+    next();
+  } else {
+    setStatus(res, { code: 400, message: 'No token provided' });
+  }
+}
