@@ -26,7 +26,7 @@ async function onPasswordSubmit() {
         showToast('Changed password', '', { variant: 'success' });
         token.logout();
       } else {
-        showToast("Passwords don't match", '', { variant: 'danger' });
+        throw { message: "Passwords don't match" };
       }
     } else {
       token.setPassword(password.value);
@@ -43,10 +43,14 @@ async function onPasswordSubmit() {
 }
 async function check() {
   if (show.value) {
-    const check = await token.check(true);
-    isValid.value = check;
+    try {
+      const check = await token.check(true);
+      isValid.value = check;
 
-    showToast(check ? 'Logged in' : 'Failed to log in', '', { time: 5000, variant: check ? 'success' : 'danger' });
+      showToast(check ? 'Logged in' : 'Failed to log in', '', { time: 5000, variant: check ? 'success' : 'danger' });
+    } catch (error) {
+      showToast('Failed', error.message, { variant: 'danger' });
+    }
   }
 }
 </script>
