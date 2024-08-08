@@ -3,7 +3,7 @@ import { AppConfig } from 'types/index';
 
 import { checkAddressesValidity, standarizeAddresses } from 'utils/index';
 import { setStatus } from 'utils/server';
-import { checkAddress, checkAdmin } from 'middleware';
+import { checkTokenValidity } from 'middleware';
 
 export default (config: AppConfig) => {
   const router = express.Router();
@@ -44,8 +44,7 @@ export default (config: AppConfig) => {
     });
   });
   router
-    .use(checkAddress)
-    .use(checkAdmin.bind(config))
+    .use(checkTokenValidity.bind(config))
     .post('/', (req, res) => {
       const currentTime = Date.now();
       config.set({ showTimeInfoTill: currentTime + (config.get().showTimeInfoDuration ?? 1) * 1000 });

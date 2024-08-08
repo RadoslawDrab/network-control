@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { checkAddress, checkAdmin } from 'middleware';
+import { checkTokenValidity } from 'middleware';
 import { standarizeAddresses } from 'utils';
 import { setStatus } from 'utils/server';
 
@@ -10,8 +10,7 @@ export default (config: AppConfig) => {
   const router = express.Router();
 
   router
-    .use(checkAddress)
-    .use(checkAdmin.bind(config))
+    .use(checkTokenValidity.bind(config))
     .route('/')
     .get((req, res) => {
       const addresses = config.get().addresses ?? [];
@@ -31,8 +30,7 @@ export default (config: AppConfig) => {
       setStatus(res, { code: 201, message: 'Added MAC address' });
     });
   router
-    .use(checkAddress)
-    .use(checkAdmin.bind(config))
+    .use(checkTokenValidity.bind(config))
     .route('/:address')
     .delete((req, res) => {
       const address = standarizeAddresses([req.params.address])[0];
