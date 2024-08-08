@@ -15,7 +15,7 @@ declare module 'vue' {
     BNav: typeof import('bootstrap-vue-next')['BNav']
     BNavItem: typeof import('bootstrap-vue-next')['BNavItem']
     BToastOrchestrator: typeof import('bootstrap-vue-next')['BToastOrchestrator']
-    LoginModal: typeof import('./src/components/LoginModal.vue')['default']
     MainHeader: typeof import('./src/components/MainHeader.vue')['default']
+    PasswordModal: typeof import('./src/components/PasswordModal.vue')['default']
   }
 }

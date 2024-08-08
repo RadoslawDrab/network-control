@@ -47,7 +47,7 @@ function itemCallback(item: NavItem) {
       <BNavItem class="vertical-line" v-else @click="token.logout"> Wyloguj się </BNavItem>
     </BNav>
   </header>
-  <LoginModal v-model:show="showLoginModal" v-model="isValidLogin" />
+  <PasswordModal v-model:show="showLoginModal" v-model="isValidLogin" />
 </template>
 <style scoped lang="scss">
 .vertical-line {
