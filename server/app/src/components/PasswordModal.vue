@@ -12,6 +12,7 @@ const props = defineProps<{ newPassword?: boolean }>();
 const token = useToken();
 const { show: showToast } = useToast();
 const password = ref<string | null>(null);
+const passwordConfirmation = ref<string | null>(null);
 
 onMounted(async () => {
   await check();
@@ -20,9 +21,13 @@ onMounted(async () => {
 async function onPasswordSubmit() {
   try {
     if (props.newPassword && token.exists()) {
-      await changePassword(password.value, token.currentToken);
-      showToast('Changed password', '', { variant: 'success' });
-      token.logout();
+      if (password.value === passwordConfirmation.value) {
+        await changePassword(password.value, token.currentToken);
+        showToast('Changed password', '', { variant: 'success' });
+        token.logout();
+      } else {
+        showToast("Passwords don't match", '', { variant: 'danger' });
+      }
     } else {
       token.setPassword(password.value);
       await check();
@@ -33,6 +38,7 @@ async function onPasswordSubmit() {
     showToast(error.message, '', { variant: 'danger' });
   } finally {
     password.value = null;
+    passwordConfirmation.value = null;
   }
 }
 async function check() {
@@ -49,6 +55,8 @@ async function check() {
     <BForm @submit="onPasswordSubmit">
       <BFormText>Podaj {{ props.newPassword ? 'nowe ' : '' }}hasło:</BFormText>
       <BFormInput v-model="password" type="password"></BFormInput>
+      <BFormText v-if="props.newPassword">Powtórz hasło:</BFormText>
+      <BFormInput v-if="props.newPassword" v-model="passwordConfirmation" type="password"></BFormInput>
     </BForm>
   </BModal>
 </template>
