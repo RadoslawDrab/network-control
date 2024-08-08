@@ -58,12 +58,6 @@ export default (config: AppConfig) => {
 
       if (!address) return setStatus(res, { code: 400, message: 'Target not specified' });
 
-      // Admin addresses from file
-      const adminAddresses = config.get().adminAddresses ?? [];
-
-      // Checks if user wants to add time to admin address
-      if (adminAddresses.includes(address)) return setStatus(res, 400);
-
       // Gets time from hours, minutes and seconds combined unless `time` variable is present
       const time = t ?? (hours ?? 0) * 60 * 60 * 1000 + (minutes ?? 0) * 60 * 1000 + (seconds ?? 0) * 1000;
 
