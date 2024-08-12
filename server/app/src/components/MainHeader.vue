@@ -3,8 +3,8 @@ import { ref } from 'vue';
 import useToken from 'composables/useToken';
 import { PhNetwork } from '@phosphor-icons/vue';
 
-export type NavItem = {
-  id: string;
+export type NavItem<Id = string> = {
+  id: Id;
   html: string;
   passwordRequired?: boolean;
   callback?: (id: string) => void;
