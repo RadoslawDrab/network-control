@@ -1,9 +1,9 @@
 import express from 'express';
 import { AppConfig } from 'types/index';
 
-import { checkAddressesValidity, standarizeAddresses } from 'utils/index';
+import { checkAddressesValidity, getPosition, standarizeAddresses } from 'utils/index';
 import { setStatus } from 'utils/server';
-import { checkTokenValidity } from 'middleware';
+import { checkBody, checkTokenValidity } from 'middleware';
 
 export default (config: AppConfig) => {
   const router = express.Router();
@@ -50,10 +50,12 @@ export default (config: AppConfig) => {
       config.set({ showTimeInfoTill: currentTime + (config.get().showTimeInfoDuration ?? 1) * 1000 });
       setStatus(res, { code: 200, message: 'Time info set' });
     })
+    .use(checkBody.bind({ values: ['x', 'y'], all: true, errorMessage: "Property 'x' or 'y' is not provided" }))
     .post('/:address', (req, res) => {
       const currentTime = Date.now();
 
       const { hours, minutes, seconds, time: t } = req.body as Record<string, number | undefined>;
+      const position = getPosition(req);
       const address = standarizeAddresses([req.params.address ?? ''])[0] as string | undefined;
 
       if (!address) return setStatus(res, { code: 400, message: 'Target not specified' });
@@ -100,7 +102,7 @@ export default (config: AppConfig) => {
         addresses: [
           // Filters out addresses present in header
           ...savedAddresses.filter((savedAddress) => address !== savedAddress.address),
-          { address, lockAfter },
+          { address, lockAfter, position },
         ],
       });
 

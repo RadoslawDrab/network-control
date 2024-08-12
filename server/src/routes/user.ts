@@ -1,7 +1,7 @@
 import express from 'express';
 
-import { checkTokenValidity } from 'middleware';
-import { standarizeAddresses } from 'utils';
+import { checkBody, checkTokenValidity } from 'middleware';
+import { getPosition, standarizeAddresses } from 'utils';
 import { setStatus } from 'utils/server';
 
 import { AppConfig } from 'types';
@@ -9,23 +9,30 @@ import { AppConfig } from 'types';
 export default (config: AppConfig) => {
   const router = express.Router();
 
+  router.use(checkTokenValidity.bind(config)).get('/', (req, res) => {
+    const addresses = config.get().addresses ?? [];
+
+    res.status(200).json(addresses);
+  });
   router
     .use(checkTokenValidity.bind(config))
-    .route('/')
-    .get((req, res) => {
-      const addresses = config.get().addresses ?? [];
-
-      res.status(200).json(addresses);
-    })
-    .post((req, res) => {
+    .use(
+      checkBody.bind({
+        values: ['address', 'x', 'y'],
+        all: true,
+        errorMessage: "Body has to include 'address', 'x' and 'y' properties ",
+      })
+    )
+    .post('/', (req, res) => {
       const address = standarizeAddresses([req.body.address ?? ''])[0];
+      const position = getPosition(req);
 
       const savedAddresses = config.get().addresses ?? [];
 
       if (savedAddresses.find((addr) => addr.address === address))
         return setStatus(res, { code: 400, message: 'MAC address already exists' });
 
-      config.set({ addresses: [...savedAddresses, { address, lockAfter: Date.now() }] });
+      config.set({ addresses: [...savedAddresses, { address, lockAfter: Date.now(), position }] });
 
       setStatus(res, { code: 201, message: 'Added MAC address' });
     });
