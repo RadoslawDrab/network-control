@@ -32,3 +32,8 @@ export function checkAddressesValidity(addresses: string | string[]): [boolean, 
 
   return [!!addr.find(macFilter), macFilter];
 }
+export function getPosition(req: Request) {
+  const x = Number(req.body.x ?? 0);
+  const y = Number(req.body.y ?? 0);
+  return { x, y };
+}
