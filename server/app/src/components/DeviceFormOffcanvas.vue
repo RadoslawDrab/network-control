@@ -1,100 +1,52 @@
 <script setup lang="ts">
 import { watch } from 'vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
 import useToast from 'composables/useToast';
 
-import { Address } from 'types/index';
-import usePromiseAuth from 'composables/usePromiseAuth';
 import useFeedback from 'composables/useFeedback';
+import DeviceGrid from './DeviceGrid.vue';
 
-type CellSettings = { name: string; shortName?: string; address: string; position: [number, number] };
-type Cell = { x: number; y: number; selected: boolean; disabled?: boolean; shortName: string };
+export type CellSettings = { name: string; shortName?: string; address: string; position: [number, number] };
 
-const show = defineModel<boolean>({ default: false });
-const currentCells = ref<CellSettings[]>([]);
 const props = withDefaults(defineProps<{ gridSize?: [number, number] }>(), { gridSize: () => [12, 12] });
+const show = defineModel<boolean>({ default: false });
 const emit = defineEmits<{ submit: [settings: CellSettings] }>();
 
 const toast = useToast();
-const auth = usePromiseAuth<Address[]>({
-  params: ['/user'],
-  onPromise: (v) => {
-    currentCells.value = v;
-  },
-});
+const deviceGrid = ref<InstanceType<typeof DeviceGrid>>();
 
-const grid = ref<Cell[]>([]);
-const gridSize = computed(() => ({
-  x: Math.max(...grid.value.map((cell) => cell.x + 1), 1),
-  y: Math.max(...grid.value.map((cell) => cell.y + 1), 1),
-}));
 const settings = useFeedback<CellSettings>({}, (values) => {
   const shortName = values.shortName ?? values.name?.slice(0, 4);
   return {
     name: !!values.name,
-    position:
-      values.position[0] >= 0 &&
-      values.position[0] < gridSize.value.x &&
-      values.position[1] >= 0 &&
-      values.position[1] < gridSize.value.y,
+    position: values.position
+      ? values.position[0] >= 0 &&
+        values.position[0] < deviceGrid.value?.gridSize.x &&
+        values.position[1] >= 0 &&
+        values.position[1] < deviceGrid.value?.gridSize.y
+      : true,
     address: !!values.address?.replace(/[^0-9A-F]/gi, '').match(/[0-9A-F]{12}/gi),
     shortName: shortName?.length < 5 && shortName?.length > 0,
   };
 });
 
-function createGrid(gridX: number, gridY: number) {
-  const g: Cell[] = [];
-  for (let x = 0; x < Math.max(gridX, 1); x++) {
-    for (let y = 0; y < Math.max(gridY, 1); y++) {
-      const currentCell = currentCells.value.find((cell) => cell.position[0] === x && cell.position[1] === y);
-      g.push({
-        x,
-        y,
-        selected: false,
-        disabled: !!currentCell,
-        shortName: currentCell?.shortName ?? currentCell?.name ?? '',
-      });
-    }
-  }
-  const enabledCells = g.filter((cell) => !cell.disabled);
-  const disabledCells = g.filter((cell) => cell.disabled);
-
-  const cells = [
-    ...disabledCells,
-    ...enabledCells.map((cell, index) => {
-      if (index === 0) {
-        settings.v.position = [cell.x, cell.y];
-        return { ...cell, selected: index === 0 };
-      }
-      return cell;
-    }),
-  ];
-
-  grid.value = cells;
-}
-
-function onSubmit() {
+async function onSubmit(event: SubmitEvent) {
   if (settings.v.address && settings.v.name && settings.v.position) {
-    emit('submit', settings.value as CellSettings);
-    settings.reset();
+    const form = event.target as HTMLFormElement;
+    await settings.reset();
+    form.reset();
     show.value = false;
+    emit('submit', settings.value as CellSettings);
   } else {
     toast.show('Not enough data');
   }
 }
 
 watch(
-  [() => props.gridSize, currentCells],
-  ([gridSize]) => {
-    createGrid(...gridSize);
-  },
-  { immediate: true }
-);
-watch(
   show,
   async (show) => {
-    if (show) await auth.promise('/user');
+    if (show) await deviceGrid.value?.auth.get();
   },
   { immediate: true }
 );
@@ -166,24 +118,12 @@ watch(
           ">
           Pozycja na siatce
         </small>
-        <div class="grid" :style="`--size-x: ${gridSize.x}; --size-y: ${gridSize.y}`">
-          <button
-            class="item"
-            type="button"
-            v-for="(item, index) in grid"
-            :key="`${item.x}-${item.y}`"
-            @click="() => (settings.v.position = [item.x, item.y])"
-            :style="`--x: ${item.x + 1}; --y: ${item.y + 1}`"
-            :data-selected="
-              settings.v.position &&
-              grid[index].x === settings.v.position[0] &&
-              grid[index].y === settings.v.position[1]
-            "
-            :disabled="item.disabled"
-            @blur="() => settings.onTouched('position')">
-            {{ item.shortName.slice(0, 4) }}
-          </button>
-        </div>
+        <DeviceGrid
+          ref="deviceGrid"
+          v-model:position="settings.v.position"
+          @blur="() => settings.onTouched('position')"
+          :grid-size="props.gridSize"
+          disable-used />
       </BFormGroup>
       <hr />
       <BButton class="mt-3" type="submit" variant="outline-primary">Dodaj</BButton>
@@ -200,38 +140,6 @@ watch(
   }
   input::placeholder {
     color: var(--bs-tertiary-color);
-  }
-  .grid {
-    border: 1px solid var(--bs-secondary-bg);
-    margin-top: 0.2em;
-    width: fit-content;
-    // width: 100%;
-    display: grid;
-    grid-template-columns: repeat(var(--size-x), 1fr);
-    grid-template-rows: repeat(var(--size-y), 1fr);
-    justify-items: center;
-    justify-content: center;
-    .item {
-      margin: 0;
-      width: 2rem;
-      aspect-ratio: 1 / 1;
-      border: inherit;
-      background-color: transparent;
-      grid-column: var(--x);
-      grid-row: var(--y);
-
-      text-align: center;
-      padding: 0.2em;
-      font-size: 0.6rem;
-      overflow: hidden;
-
-      &[data-selected='true'] {
-        background-color: var(--bs-primary);
-      }
-      &:disabled {
-        background-color: var(--bs-primary-bg-subtle);
-      }
-    }
   }
 }
 </style>
