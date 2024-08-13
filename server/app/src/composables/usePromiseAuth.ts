@@ -35,6 +35,11 @@ const usePromiseAuth = <T>(options?: {
     }
     return value;
   };
+  async function get() {
+    if (options && options.params && options.onPromise) {
+      return await func(...options.params);
+    }
+  }
   onMounted(async () => {
     if (options && options.onInit) {
       if (options.initCondition === false) return;
@@ -43,6 +48,6 @@ const usePromiseAuth = <T>(options?: {
       value.value = v;
     }
   });
-  return { promise: func, value };
+  return { promise: func, value, get };
 };
 export default usePromiseAuth;
