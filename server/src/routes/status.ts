@@ -50,12 +50,15 @@ export default (config: AppConfig) => {
       config.set({ showTimeInfoTill: currentTime + (config.get().showTimeInfoDuration ?? 1) * 1000 });
       setStatus(res, { code: 200, message: 'Time info set' });
     })
-    .use(checkBody.bind({ values: ['x', 'y'], all: true, errorMessage: "Property 'x' or 'y' is not provided" }))
+    .use(
+      checkBody.bind({
+        values: ['time', 'hours', 'minutes', 'seconds'],
+      })
+    )
     .post('/:address', (req, res) => {
       const currentTime = Date.now();
 
       const { hours, minutes, seconds, time: t } = req.body as Record<string, number | undefined>;
-      const position = getPosition(req);
       const address = standarizeAddresses([req.params.address ?? ''])[0] as string | undefined;
 
       if (!address) return setStatus(res, { code: 400, message: 'Target not specified' });
@@ -70,6 +73,12 @@ export default (config: AppConfig) => {
 
       // Addresses saved on server
       const savedAddresses = config.get().addresses ?? [];
+
+      const currentDevice = savedAddresses.find((savedAddress) => address === savedAddress.address);
+      if (!currentDevice) {
+        return setStatus(res, { code: 400, message: 'No device with specified MAC address' });
+      }
+
       // Time in number type
       const changeTime = Number(time);
       // Regex to check if `+` character is present
@@ -81,8 +90,7 @@ export default (config: AppConfig) => {
         !!seconds?.toString().match(plusRegEx) ||
         !!time.toString().match(plusRegEx);
 
-      const currentlockAfter =
-        savedAddresses.find((savedAddress) => address === savedAddress.address)?.lockAfter ?? currentTime;
+      const currentlockAfter = currentDevice?.lockAfter ?? currentTime;
 
       const lockAfter = (() => {
         // Changes lock to current time if `time` is 0
@@ -102,7 +110,7 @@ export default (config: AppConfig) => {
         addresses: [
           // Filters out addresses present in header
           ...savedAddresses.filter((savedAddress) => address !== savedAddress.address),
-          { address, lockAfter, position },
+          { ...currentDevice, lockAfter },
         ],
       });
 
