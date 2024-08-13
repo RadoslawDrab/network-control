@@ -14,10 +14,6 @@ const { show: showToast } = useToast();
 const password = ref<string | null>(null);
 const passwordConfirmation = ref<string | null>(null);
 
-onMounted(async () => {
-  await check();
-});
-
 async function onPasswordSubmit() {
   try {
     if (props.newPassword && token.exists()) {
@@ -42,15 +38,18 @@ async function onPasswordSubmit() {
   }
 }
 async function check() {
-  if (show.value) {
-    try {
-      const check = await token.check(true);
-      isValid.value = check;
+  try {
+    const check = await token.check(true);
+    isValid.value = check;
 
-      showToast(check ? 'Logged in' : 'Failed to log in', { time: 5000, variant: check ? 'success' : 'danger' });
-    } catch (error) {
-      showToast('Failed', { variant: 'danger', body: error.message });
+    showToast(check ? 'Logged in' : 'Failed to log in', { time: 5000, variant: check ? 'success' : 'danger' });
+
+    if (!check) {
+      token.removeToken();
     }
+    return check;
+  } catch (error) {
+    showToast('Failed', { variant: 'danger', body: error.message });
   }
 }
 </script>
