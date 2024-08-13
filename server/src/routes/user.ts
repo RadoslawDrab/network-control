@@ -18,21 +18,35 @@ export default (config: AppConfig) => {
     .use(checkTokenValidity.bind(config))
     .use(
       checkBody.bind({
-        values: ['address', 'x', 'y'],
+        values: ['address', 'x', 'y', 'name', 'position'],
         all: true,
-        errorMessage: "Body has to include 'address', 'x' and 'y' properties ",
       })
     )
     .post('/', (req, res) => {
       const address = standarizeAddresses([req.body.address ?? ''])[0];
-      const position = getPosition(req);
 
       const savedAddresses = config.get().addresses ?? [];
 
-      if (savedAddresses.find((addr) => addr.address === address))
+      if (savedAddresses.some((addr) => addr.address === address))
         return setStatus(res, { code: 400, message: 'MAC address already exists' });
+      const position = getPosition(req);
 
-      config.set({ addresses: [...savedAddresses, { address, lockAfter: Date.now(), position }] });
+      if (savedAddresses.some((addr) => addr.position[0] === position[0] && addr.position[1] === position[1])) {
+        return setStatus(res, { code: 400, message: 'Device in this position is already added' });
+      }
+
+      config.set({
+        addresses: [
+          ...savedAddresses,
+          {
+            address,
+            lockAfter: Date.now(),
+            position,
+            name: req.body.name,
+            shortName: req.body.shortName,
+          },
+        ],
+      });
 
       setStatus(res, { code: 201, message: 'Added MAC address' });
     });

@@ -5,7 +5,7 @@ export const settings: SettingsKey[] = ['addresses'] as const;
 export type SettingsKey = keyof Settings;
 
 export interface Settings extends ConfigType {
-  addresses: { address: string; lockAfter?: number; position: { x: number; y: number } }[];
+  addresses: Address[];
   /** Time in miliseconds after which info will be closed */
   showTimeInfoTill: number;
   /** Time in seconds to keep info after reminder */
@@ -17,3 +17,10 @@ export interface Settings extends ConfigType {
   adminPasswordCacheTime: number;
 }
 export type AppConfig = Config<Settings>;
+export type Address = {
+  address: string;
+  lockAfter?: number;
+  position: [number, number];
+  name: string;
+  shortName?: string;
+};
