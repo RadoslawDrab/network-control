@@ -1,10 +1,10 @@
-import { computed, reactive, ref, toValue } from 'vue';
+import { computed, nextTick, reactive, ref, toValue } from 'vue';
 
 const useFeedback = <T extends Record<string, any>>(
   defaultValue: Partial<T>,
   validity?: (values: Partial<T>) => Partial<Record<keyof T, boolean>>
 ) => {
-  const value = reactive<Partial<T>>(defaultValue);
+  const value = reactive<Partial<T>>({ ...defaultValue });
   const isTouched = ref<Partial<Record<keyof T, boolean>>>({});
   const isValid = computed<Partial<Record<keyof T, boolean | null>>>(() => {
     if (!validity) return {};
@@ -20,9 +20,10 @@ const useFeedback = <T extends Record<string, any>>(
     isTouched.value[name] = true;
   }
 
-  function reset() {
-    Object.assign(value, defaultValue);
+  async function reset() {
+    Object.assign(value, { ...defaultValue });
     isTouched.value = {};
+    await nextTick();
   }
 
   return { onTouched, value, isValid, isTouched, v: value, reset };
