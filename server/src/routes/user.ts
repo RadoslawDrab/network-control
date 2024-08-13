@@ -18,7 +18,7 @@ export default (config: AppConfig) => {
     .use(checkTokenValidity.bind(config))
     .use(
       checkBody.bind({
-        values: ['address', 'x', 'y', 'name', 'position'],
+        values: ['address', 'name', 'position'],
         all: true,
       })
     )
