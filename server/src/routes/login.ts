@@ -28,7 +28,6 @@ export default (config: AppConfig) => {
     });
   router
     .use(checkHeaders.bind({ values: ['token'], errorMessage: 'No token provided' }))
-    .use(checkTokenValidity.bind(config))
     .get('/', (req, res) => {
       const token = req.headers['token'] as string;
       const [isValid] = getTokenValidity(token);
