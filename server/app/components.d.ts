@@ -20,6 +20,7 @@ declare module 'vue' {
     BOffcanvas: typeof import('bootstrap-vue-next')['BOffcanvas']
     BToastOrchestrator: typeof import('bootstrap-vue-next')['BToastOrchestrator']
     DeviceFormOffcanvas: typeof import('./src/components/DeviceFormOffcanvas.vue')['default']
+    DeviceGrid: typeof import('./src/components/DeviceGrid.vue')['default']
     MainHeader: typeof import('./src/components/MainHeader.vue')['default']
     PasswordModal: typeof import('./src/components/PasswordModal.vue')['default']
   }
