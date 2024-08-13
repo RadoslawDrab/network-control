@@ -5,10 +5,10 @@ import useToken from './useToken';
 
 type PromiseFunc<T> = typeof promise<T>;
 type PromiseFuncParameters<T> = Parameters<PromiseFunc<T>>;
-const usePromiseAuth = <T>(options: {
+const usePromiseAuth = <T>(options?: {
   onInit?: (value: T) => Promise<void> | void;
   onPromise?: (value: T) => Promise<void | T> | void | T;
-  params: PromiseFuncParameters<T>;
+  params?: PromiseFuncParameters<T>;
   initCondition?: boolean;
 }) => {
   const token = useToken();
