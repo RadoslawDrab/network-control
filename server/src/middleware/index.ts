@@ -43,7 +43,11 @@ function check<This extends BaseCheckThis>(
     next();
   } else {
     if (this.errorMessage) setStatus(res, { code: 400, message: this.errorMessage });
-    else setStatus(res, 400);
+    else
+      setStatus(res, {
+        code: 400,
+        message: `'${this.obj}' has to include ${this.all && !this.any ? 'all' : 'any'} of this props: ${this.values}`,
+      });
   }
 }
 
@@ -63,13 +67,14 @@ export function checkBody(
 ) {
   return check.call({ obj: 'body', ...this }, req, res, next);
 }
+
 export function checkTokenValidity(
   this: AppConfig,
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) {
-  const token = req.headers['token'] as string;
+  const token = req.headers['token'] as string | undefined;
   if (!token) return setStatus(res, { code: 400, message: 'No token provided' });
 
   const adminPassword = this.get().adminPassword;
