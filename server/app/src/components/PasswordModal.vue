@@ -23,7 +23,7 @@ async function onPasswordSubmit() {
     if (props.newPassword && token.exists()) {
       if (password.value === passwordConfirmation.value) {
         await changePassword(password.value, token.currentToken);
-        showToast('Changed password', '', { variant: 'success' });
+        showToast('Changed password', { variant: 'success' });
         token.logout();
       } else {
         throw { message: "Passwords don't match" };
@@ -35,7 +35,7 @@ async function onPasswordSubmit() {
     show.value = false;
   } catch (error) {
     show.value = true;
-    showToast(error.message, '', { variant: 'danger' });
+    showToast(error.message, { variant: 'danger' });
   } finally {
     password.value = null;
     passwordConfirmation.value = null;
@@ -47,9 +47,9 @@ async function check() {
       const check = await token.check(true);
       isValid.value = check;
 
-      showToast(check ? 'Logged in' : 'Failed to log in', '', { time: 5000, variant: check ? 'success' : 'danger' });
+      showToast(check ? 'Logged in' : 'Failed to log in', { time: 5000, variant: check ? 'success' : 'danger' });
     } catch (error) {
-      showToast('Failed', error.message, { variant: 'danger' });
+      showToast('Failed', { variant: 'danger', body: error.message });
     }
   }
 }

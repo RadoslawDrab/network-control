@@ -4,8 +4,7 @@ const useT = () => {
   const toast = useToast();
   function show(
     title: string,
-    body: string,
-    options?: { time?: number; variant?: ColorVariant },
+    options?: { time?: number; variant?: ColorVariant; body?: string },
     toastOptions?: OrchestratedToast
   ) {
     const time = options?.time ?? 0;
@@ -15,7 +14,7 @@ const useT = () => {
       toast.show({
         props: {
           title,
-          body,
+          body: options?.body,
           value: time,
           interval: 100,
           pos: 'bottom-center',
