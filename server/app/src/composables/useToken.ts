@@ -57,8 +57,7 @@ const useToken = defineStore('token', () => {
     password.value = value;
     if (value === null) {
       isLoggedIn.value = false;
-      token.value = null;
-      storage.set({ token: null });
+      removeToken();
     }
   }
   function removeToken() {
