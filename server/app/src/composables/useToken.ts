@@ -27,7 +27,7 @@ const useToken = defineStore('token', () => {
   }
   async function check(getFirst: boolean = false): Promise<boolean> {
     try {
-      if (getFirst) {
+      if (getFirst && !token.value) {
         await get();
         await nextTick();
       }
@@ -45,6 +45,7 @@ const useToken = defineStore('token', () => {
         return false;
       }
     } catch (error) {
+      token.value = null;
       isLoggedIn.value = false;
       return false;
     }
