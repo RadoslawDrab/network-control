@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*", "./components.d.ts", "./env.d.ts"],
+  "include": ["./src/**/*", "./components.d.ts", "./env.d.ts", "../src/types/*.ts"],
   "compilerOptions": {
     "module": "ES2022",
     "moduleResolution": "Node",
@@ -11,7 +11,8 @@
       "assets/*": ["./assets/*"],
       "utils/*": ["./utils/*"],
       "components/*": ["./components/*"],
-      "composables/*": ["./composables/*"]
+      "composables/*": ["./composables/*"],
+      "types/*": ["../../src/types/*"]
     }
   }
 }
