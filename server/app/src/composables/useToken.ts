@@ -39,27 +39,35 @@ const useToken = defineStore('token', () => {
       if (token.value) {
         const check = await checkToken(token.value);
         isLoggedIn.value = check;
+        await nextTick();
         return check;
       } else {
         isLoggedIn.value = false;
+        await nextTick();
         return false;
       }
     } catch (error) {
       token.value = null;
       isLoggedIn.value = false;
+      await nextTick();
       return false;
     }
   }
   function setPassword(value: string | null) {
     password.value = value;
-    if (!value) {
+    if (value === null) {
       isLoggedIn.value = false;
+      token.value = null;
       storage.set({ token: null });
     }
+  }
+  function removeToken() {
+    storage.set({ token: null });
+    token.value = null;
   }
   function logout() {
     setPassword(null);
   }
-  return { get, check, setPassword, exists, isLoggedIn, logout, currentToken: token };
+  return { get, check, setPassword, exists, isLoggedIn, logout, currentToken: token, removeToken };
 });
 export default useToken;
