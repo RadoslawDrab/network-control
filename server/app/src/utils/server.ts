@@ -16,7 +16,7 @@ export async function promise<
   const response = await fetch(baseUrl + path.replace(/\/$/, '') + queryString, {
     method: 'GET',
     ...init,
-    headers: { 'Content-Type': 'application/json', ...init.headers },
+    headers: { 'Content-Type': 'application/json', ...init?.headers },
   });
 
   if (!response.ok) {
