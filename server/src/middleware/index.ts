@@ -3,6 +3,7 @@ import crypto from 'crypto-js';
 
 import { getAddresses } from 'utils/index';
 import { setStatus } from 'utils/server';
+import { origin } from 'index';
 
 import { Status } from 'types/server';
 import { AppConfig } from 'types';
@@ -84,5 +85,13 @@ export function checkTokenValidity(
     return next();
   } else {
     return setStatus(res, { code: 401, message: 'Token is invalid' });
+  }
+}
+export function checkOrigin(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const isOrigin = origin.some((o) => o === req.headers.origin);
+  if (isOrigin) {
+    next();
+  } else {
+    return setStatus(res, { code: 401, message: 'Invalid origin' });
   }
 }
