@@ -5,35 +5,47 @@ import useToken from './useToken';
 
 type PromiseFunc<T> = typeof promise<T>;
 type PromiseFuncParameters<T> = Parameters<PromiseFunc<T>>;
-const usePromiseAuth = <T>(options?: {
+type PromiseFuncReturn<T> = ReturnType<PromiseFunc<T>>;
+export type Auth<T> = ReturnType<typeof usePromiseAuth<T>>;
+
+const usePromiseAuth = <T = any>(options?: {
   onInit?: (value: T) => Promise<void> | void;
-  onPromise?: (value: T) => Promise<void | T> | void | T;
+  onPromise?: (value: T) => Promise<void> | void;
   params?: PromiseFuncParameters<T>;
   initCondition?: boolean;
+  checkAuth?: boolean;
 }) => {
+  const checkAuth = options?.checkAuth ?? true;
   const token = useToken();
   const value = ref<T>(null);
 
-  const func: PromiseFunc<T> = async (path, query, init, baseUrl) => {
-    if (!(await token.check(true))) {
-      throw { code: 400, message: 'Token is invalid' };
+  const func = async <Type extends T>(...params: PromiseFuncParameters<Type>): Promise<PromiseFuncReturn<Type>> => {
+    const [path, query, init, baseUrl] = params;
+    if (checkAuth) {
+      if (!token.currentToken) {
+        throw { code: 400, message: 'Token not provided' };
+      }
+      if (!(await token.check(true))) {
+        token.removeToken();
+        throw { code: 400, message: 'Token is invalid' };
+      }
     }
 
-    if (!token.currentToken) {
-      throw { code: 400, message: 'Token not provided' };
-    }
-    const value = await promise<T>(
-      path,
-      query,
-      { ...init, headers: { ...init?.headers, token: token.currentToken } },
-      baseUrl
-    );
+    try {
+      const value = await promise<Type>(
+        path,
+        query,
+        { ...init, headers: { ...init?.headers, token: checkAuth ? token.currentToken : undefined } },
+        baseUrl
+      );
 
-    if (options && options.onPromise) {
-      const newValue = await options.onPromise(value);
-      if (newValue) return newValue;
+      if (options && options.onPromise) {
+        await options.onPromise(value);
+      }
+      return value;
+    } catch (error) {
+      throw error;
     }
-    return value;
   };
   async function get() {
     if (options && options.params && options.onPromise) {
@@ -50,4 +62,5 @@ const usePromiseAuth = <T>(options?: {
   });
   return { promise: func, value, get };
 };
+
 export default usePromiseAuth;
