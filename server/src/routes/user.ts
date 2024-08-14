@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { checkBody, checkTokenValidity } from 'middleware';
+import { checkBody, checkOrigin, checkTokenValidity } from 'middleware';
 import { getPosition, standarizeAddresses } from 'utils';
 import { setStatus } from 'utils/server';
 
@@ -9,12 +9,24 @@ import { AppConfig } from 'types';
 export default (config: AppConfig) => {
   const router = express.Router();
 
-  router.use(checkTokenValidity.bind(config)).get('/', (req, res) => {
-    const addresses = config.get().addresses ?? [];
-
-    res.status(200).json(addresses);
-  });
   router
+    .use(checkOrigin)
+    .get('/:address', (req, res) => {
+      const addresses = config.get().addresses ?? [];
+
+      const address = addresses.find((addr) => addr.address === req.params.address);
+
+      if (!address) {
+        return setStatus(res, { code: 400, message: 'MAC address not found' });
+      }
+
+      res.status(200).json(address);
+    })
+    .get('/', (req, res) => {
+      const addresses = config.get().addresses ?? [];
+
+      res.status(200).json(addresses);
+    })
     .use(checkTokenValidity.bind(config))
     .use(
       checkBody.bind({
