@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { PhX } from '@phosphor-icons/vue';
 
 import useToken from 'composables/useToken';
 import useToast from 'composables/useToast';
+import usePromiseAuth from 'composables/usePromiseAuth';
 import { promise } from 'utils/server';
 
 import { Address } from 'types/index';
@@ -29,8 +30,11 @@ const macAddress = computed(() =>
         .replace(/:$/, '')
     : ''
 );
+const deleteDeviceModal = ref<boolean>(false);
 const token = useToken();
 const toast = useToast();
+
+const auth = usePromiseAuth();
 
 /** @param time Time in minutes */
 async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change') {
@@ -61,6 +65,16 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
     toast.show('Błąd', { variant: 'danger', body: error.message });
   }
 }
+async function deleteDevice() {
+  try {
+    await auth.promise(`/user/${address.value.address}`, {}, { method: 'DELETE' });
+    toast.show('Deleted user', { variant: 'success' });
+    emit('delete', address.value);
+    address.value = null;
+  } catch (error) {
+    toast.show('Error', { variant: 'danger', body: error.message });
+  }
+}
 </script>
 <template>
   <aside>
@@ -82,7 +96,7 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
         </div>
         <BButton
           v-if="token.isLoggedIn"
-          @click="() => emit('delete', props.address)"
+          @click="() => (deleteDeviceModal = true)"
           class="p-0 align-self-start"
           variant="outline-danger"
           tooltip
@@ -129,6 +143,21 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
           </BButton>
         </div>
       </div>
+      <BModal
+        v-model="deleteDeviceModal"
+        hide-header
+        centered
+        ok-variant="danger"
+        ok-title="Usuń"
+        cancel-title="Anuluj"
+        @ok="deleteDevice">
+        Usunąć urządzenie
+        <span class="fw-bold">
+          {{ address.name }}
+          <span v-if="address.shortName">({{ address.shortName }})</span>
+        </span>
+        <small class="text-secondary"> ({{ macAddress }})</small>
+      </BModal>
     </BForm>
     <div v-else>Nie wybrano urządzenia</div>
   </aside>

@@ -4,6 +4,7 @@ import { reactive, ref } from 'vue';
 import usePromiseAuth from 'composables/usePromiseAuth';
 import useToast from 'composables/useToast';
 
+import DeviceGrid from 'components/DeviceGrid.vue';
 import { NavItem } from 'components/MainHeader.vue';
 import { Address } from 'types/index';
 
@@ -25,6 +26,7 @@ const currentUnlocks = ref<string[]>([]);
 
 const auth = usePromiseAuth();
 const toast = useToast();
+const deviceGrid = ref<InstanceType<typeof DeviceGrid>>();
 
 function navCallback(id: string) {
   Object.keys(show)
@@ -49,16 +51,27 @@ async function onDeviceClick(address: Address) {
 async function onLockChange(c: string[]) {
   currentUnlocks.value = c;
 }
+async function onDeviceDelete() {
+  if (deviceGrid.value) {
+    deviceGrid.value.resetPosition();
+    await deviceGrid.value.auth.get();
+  }
+}
 </script>
 <template>
   <BContainer>
     <MainHeader :navItems="navItems" :callback="navCallback" />
     <BRow gutter-y="3">
       <BCol cols="auto" class="d-flex justify-content-center">
-        <DeviceGrid @click="onDeviceClick" :status-interval="3000" @lock-change="onLockChange" />
+        <DeviceGrid
+          ref="deviceGrid"
+          @click="onDeviceClick"
+          :status-interval="3000"
+          @lock-change="onLockChange"
+          tooltips />
       </BCol>
       <BCol>
-        <DeviceManageForm :currentUnlocks="currentUnlocks" v-model="selectedAddress" />
+        <DeviceManageForm :currentUnlocks="currentUnlocks" v-model="selectedAddress" @delete="onDeviceDelete" />
       </BCol>
     </BRow>
   </BContainer>
