@@ -1,7 +1,7 @@
 import express from 'express';
 import crypto from 'crypto-js';
 
-import { checkBody, checkHeaders, checkTokenValidity } from 'middleware';
+import { checkBody, checkHeaders, checkOrigin, checkTokenValidity } from 'middleware';
 import { setStatus } from 'utils/server';
 
 import { AppConfig } from 'types';
@@ -10,6 +10,7 @@ import { Status } from 'types/server';
 export default (config: AppConfig) => {
   const router = express.Router();
   router
+    .use(checkOrigin)
     .use(checkHeaders.bind({ values: ['password'], errorMessage: 'No password provided' }))
     .get('/token', (req, res) => {
       const password = req.headers['password'] as string;
