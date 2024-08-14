@@ -12,17 +12,25 @@ export type Cell = {
   y: number;
   selected: boolean;
   disabled?: boolean;
+  name: string;
   shortName: string;
   unlocked: boolean;
 };
 
 const props = withDefaults(
-  defineProps<{ gridSize?: [number, number]; disableUsed?: boolean; checkAuth?: boolean; statusInterval?: number }>(),
+  defineProps<{
+    gridSize?: [number, number];
+    disableUsed?: boolean;
+    checkAuth?: boolean;
+    statusInterval?: number;
+    tooltips?: boolean;
+  }>(),
   {
     gridSize: () => [12, 12],
     disableUsed: false,
     checkAuth: false,
     statusInterval: 0,
+    tooltips: false,
   }
 );
 
@@ -67,8 +75,6 @@ useDeviceStatus(null, {
   },
 });
 
-defineExpose({ auth, gridSize });
-
 function createGrid(gridX: number, gridY: number) {
   const g: Cell[] = [];
   for (let x = 0; x < Math.max(gridX, 1); x++) {
@@ -79,6 +85,7 @@ function createGrid(gridX: number, gridY: number) {
         y,
         selected: false,
         disabled: props.disableUsed ? !!currentCell : !currentCell,
+        name: currentCell?.name ?? '',
         shortName: currentCell?.shortName ?? currentCell?.name ?? '',
         address: currentCell?.address ?? null,
         unlocked: false,
@@ -101,6 +108,9 @@ function createGrid(gridX: number, gridY: number) {
 
   grid.value = cells;
 }
+function resetPosition() {
+  position.value = null;
+}
 
 watch(
   [() => props.gridSize, currentAddresses],
@@ -119,6 +129,7 @@ watch(
     );
   }
 );
+defineExpose({ auth, gridSize, resetPosition });
 </script>
 <template>
   <div class="grid" :style="`--size-x: ${gridSize.x}; --size-y: ${gridSize.y}`">
@@ -137,7 +148,10 @@ watch(
       :data-selected="position && grid[index].x === position[0] && grid[index].y === position[1]"
       :data-unlocked="item.unlocked"
       :disabled="item.disabled"
-      @blur="() => emit('blur', item)">
+      @blur="() => emit('blur', item)"
+      :tooltip="props.tooltips"
+      :aria-label="`${item.name} (${item.shortName})`"
+      tooltip-fixed>
       {{ item.shortName.slice(0, 4) }}
     </button>
   </div>
