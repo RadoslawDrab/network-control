@@ -1,9 +1,9 @@
 import express from 'express';
 import { AppConfig } from 'types/index';
 
-import { checkAddressesValidity, getPosition, standarizeAddresses } from 'utils/index';
+import { checkAddressesValidity, standarizeAddresses } from 'utils/index';
 import { setStatus } from 'utils/server';
-import { checkBody, checkTokenValidity } from 'middleware';
+import { checkBody, checkOrigin } from 'middleware';
 
 export default (config: AppConfig) => {
   const router = express.Router();
@@ -44,7 +44,22 @@ export default (config: AppConfig) => {
     });
   });
   router
-    .use(checkTokenValidity.bind(config))
+    .use(checkOrigin)
+    .get('/', (req, res) => {
+      const currentTime = Date.now();
+      const addresses = config.get().addresses;
+
+      const savedAddresses = addresses?.filter((addr) => addr.lockAfter && addr.lockAfter > 0) ?? [];
+      savedAddresses.map((addr) => {
+        return { address: addr.address, isLocked: currentTime >= (addr.lockAfter ?? 0) };
+      });
+
+      res.status(200).json({
+        locks:
+          savedAddresses.map((addr) => ({ address: addr.address, isLocked: currentTime >= (addr.lockAfter ?? 0) })) ??
+          [],
+      });
+    })
     .post('/', (req, res) => {
       const currentTime = Date.now();
       config.set({ showTimeInfoTill: currentTime + (config.get().showTimeInfoDuration ?? 1) * 1000 });

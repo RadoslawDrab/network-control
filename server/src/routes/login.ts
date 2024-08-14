@@ -1,7 +1,7 @@
 import express from 'express';
 import crypto from 'crypto-js';
 
-import { checkBody, checkHeaders, checkOrigin, checkTokenValidity } from 'middleware';
+import { checkBody, checkHeaders, checkOrigin } from 'middleware';
 import { setStatus } from 'utils/server';
 
 import { AppConfig } from 'types';
