@@ -26,7 +26,7 @@ const useDeviceStatus = (
           .filter((cell) => {
             if (options?.filter) {
               const lock = locks.find((l) => l.address === cell.address);
-              const ret = options.filter(cell.address, lock.isLocked ?? true);
+              const ret = options.filter(cell.address, lock?.isLocked ?? true);
               return typeof ret === 'boolean' ? ret : true;
             }
           });
