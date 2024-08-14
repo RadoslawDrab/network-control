@@ -15,6 +15,7 @@ import { standarizeAddresses } from 'utils';
 const PORT = process.env._PORT || 3000;
 const HOSTNAME = process.env._HOSTNAME || '127.0.0.1';
 const PRODUCTION = process.env.NODE_ENV === 'production';
+export const origin = [`http://${HOSTNAME}:${PORT}`, `http://localhost:3001`];
 const app = express();
 
 const networkInterfaces = os.networkInterfaces();
@@ -41,7 +42,7 @@ const config = new Config<Settings>(
 );
 
 app.use(express.json());
-app.use(cors({ origin: [`http://${HOSTNAME}:${PORT}`, `http://localhost:3001`] }));
+app.use(cors({ origin }));
 
 app.use('/api/status', status(config));
 app.use('/api/user', user(config));
