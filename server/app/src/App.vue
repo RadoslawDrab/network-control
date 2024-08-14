@@ -4,9 +4,8 @@ import { reactive, ref } from 'vue';
 import usePromiseAuth from 'composables/usePromiseAuth';
 import useToast from 'composables/useToast';
 
-import { Address } from 'types/index';
-
 import { NavItem } from 'components/MainHeader.vue';
+import { Address } from 'types/index';
 
 const show = reactive<{ changePasswordModal: boolean; addDeviceForm: boolean }>({
   changePasswordModal: false,
@@ -21,6 +20,8 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
   },
   { id: 'changePasswordModal', html: 'Zmień hasło', passwordRequired: true },
 ]);
+const selectedAddress = ref<Address | null>(null);
+const currentUnlocks = ref<string[]>([]);
 
 const auth = usePromiseAuth();
 const toast = useToast();
@@ -42,11 +43,24 @@ async function onDeviceAdded(settings: Address) {
     toast.show('Failed', { variant: 'danger', body: error.message });
   }
 }
+async function onDeviceClick(address: Address) {
+  selectedAddress.value = address;
+}
+async function onLockChange(c: string[]) {
+  currentUnlocks.value = c;
+}
 </script>
 <template>
   <BContainer>
     <MainHeader :navItems="navItems" :callback="navCallback" />
-    <div>APP</div>
+    <BRow gutter-y="3">
+      <BCol cols="auto" class="d-flex justify-content-center">
+        <DeviceGrid @click="onDeviceClick" :status-interval="3000" @lock-change="onLockChange" />
+      </BCol>
+      <BCol>
+        <DeviceManageForm :currentUnlocks="currentUnlocks" v-model="selectedAddress" />
+      </BCol>
+    </BRow>
   </BContainer>
   <PasswordModal new-password v-model:show="show.changePasswordModal" />
   <DeviceFormOffcanvas v-model="show.addDeviceForm" @submit="onDeviceAdded" />

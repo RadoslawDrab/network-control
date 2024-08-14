@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BButton: typeof import('bootstrap-vue-next')['BButton']
+    BCol: typeof import('bootstrap-vue-next')['BCol']
     BContainer: typeof import('bootstrap-vue-next')['BContainer']
     BForm: typeof import('bootstrap-vue-next')['BForm']
     BFormGroup: typeof import('bootstrap-vue-next')['BFormGroup']
@@ -18,9 +19,11 @@ declare module 'vue' {
     BNav: typeof import('bootstrap-vue-next')['BNav']
     BNavItem: typeof import('bootstrap-vue-next')['BNavItem']
     BOffcanvas: typeof import('bootstrap-vue-next')['BOffcanvas']
+    BRow: typeof import('bootstrap-vue-next')['BRow']
     BToastOrchestrator: typeof import('bootstrap-vue-next')['BToastOrchestrator']
     DeviceFormOffcanvas: typeof import('./src/components/DeviceFormOffcanvas.vue')['default']
     DeviceGrid: typeof import('./src/components/DeviceGrid.vue')['default']
+    DeviceManageForm: typeof import('./src/components/DeviceManageForm.vue')['default']
     MainHeader: typeof import('./src/components/MainHeader.vue')['default']
     PasswordModal: typeof import('./src/components/PasswordModal.vue')['default']
   }
