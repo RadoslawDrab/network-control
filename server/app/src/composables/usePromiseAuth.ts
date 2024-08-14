@@ -8,13 +8,15 @@ type PromiseFuncParameters<T> = Parameters<PromiseFunc<T>>;
 type PromiseFuncReturn<T> = ReturnType<PromiseFunc<T>>;
 export type Auth<T> = ReturnType<typeof usePromiseAuth<T>>;
 
-const usePromiseAuth = <T = any>(options?: {
-  onInit?: (value: T) => Promise<void> | void;
-  onPromise?: (value: T) => Promise<void> | void;
-  params?: PromiseFuncParameters<T>;
-  initCondition?: boolean;
-  checkAuth?: boolean;
-}) => {
+const usePromiseAuth = <T = any>(
+  options: {
+    onInit?: (value: T) => Promise<void> | void;
+    onPromise?: (value: T) => Promise<void> | void;
+    params?: PromiseFuncParameters<T>;
+    initCondition?: boolean;
+    checkAuth?: boolean;
+  } = { initCondition: true, checkAuth: true }
+) => {
   const checkAuth = options?.checkAuth ?? true;
   const token = useToken();
   const value = ref<T>(null);
