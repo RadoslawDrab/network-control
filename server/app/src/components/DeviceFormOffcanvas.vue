@@ -16,30 +16,34 @@ const emit = defineEmits<{ submit: [settings: CellSettings] }>();
 const toast = useToast();
 const deviceGrid = ref<InstanceType<typeof DeviceGrid>>();
 
-const settings = useFeedback<CellSettings>({}, (values) => {
-  const shortName = values.shortName ?? values.name?.slice(0, 4);
-  return {
-    name: !!values.name,
-    position: values.position
-      ? values.position[0] >= 0 &&
-        values.position[0] < deviceGrid.value?.gridSize.x &&
-        values.position[1] >= 0 &&
-        values.position[1] < deviceGrid.value?.gridSize.y
-      : true,
-    address: !!values.address?.replace(/[^0-9A-F]/gi, '').match(/[0-9A-F]{12}/gi),
-    shortName: shortName?.length < 5 && shortName?.length > 0,
-  };
-});
+const settings = useFeedback<CellSettings>(
+  {},
+  (values) => {
+    const shortName = values.shortName ?? values.name?.slice(0, 4);
+    return {
+      name: !!values.name,
+      position: values.position
+        ? values.position[0] >= 0 &&
+          values.position[0] < deviceGrid.value?.gridSize.x &&
+          values.position[1] >= 0 &&
+          values.position[1] < deviceGrid.value?.gridSize.y
+        : false,
+      address: !!values.address?.replace(/[^0-9A-F]/gi, '').match(/[0-9A-F]{12}/gi),
+      shortName: shortName?.length < 5 && shortName?.length > 0,
+    };
+  },
+  ['position']
+);
 
 async function onSubmit(event: SubmitEvent) {
-  if (settings.v.address && settings.v.name && settings.v.position) {
+  if (settings.allValid.value) {
     const form = event.target as HTMLFormElement;
     await settings.reset();
     form.reset();
     show.value = false;
     emit('submit', settings.value as CellSettings);
   } else {
-    toast.show('Not enough data');
+    toast.show('Not enough data', { variant: 'danger' });
   }
 }
 
@@ -107,17 +111,8 @@ watch(
       </BFormGroup>
       <hr />
       <BFormGroup>
-        <small
-          class="text-body-secondary form-text"
-          :class="
-            settings.isValid.value.position !== null
-              ? settings.isValid.value.position === true
-                ? 'text-success'
-                : 'text-danger'
-              : ''
-          ">
-          Pozycja na siatce
-        </small>
+        <small class="text-body-secondary form-text"> Pozycja na siatce </small>
+        <BFormInvalidFeedback :state="settings.isValid.value.position">Pozycja jest wymagana</BFormInvalidFeedback>
         <DeviceGrid
           ref="deviceGrid"
           v-model:position="settings.v.position"
