@@ -33,7 +33,7 @@ export function checkAddressesValidity(addresses: string | string[]): [boolean, 
   return [!!addr.find(macFilter), macFilter];
 }
 export function getPosition(req: Request): [number, number] {
-  const x = Number(req.body.position[0] ?? 0);
-  const y = Number(req.body.position[1] ?? 0);
+  const x = Number(req.body?.position?.at(0) ?? 0);
+  const y = Number(req.body?.position?.at(0) ?? 0);
   return [x, y];
 }
