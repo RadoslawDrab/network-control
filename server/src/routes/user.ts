@@ -6,9 +6,8 @@ import { setStatus } from 'utils/server';
 
 import { AppConfig } from 'types';
 
-export default (config: AppConfig) => {
+export default (config: AppConfig, app: express.Express) => {
   const router = express.Router();
-
   router
     .use(checkOrigin)
     .get('/:address', (req, res) => {
@@ -76,23 +75,6 @@ export default (config: AppConfig) => {
       });
 
       setStatus(res, { code: 201, message: 'Added MAC address' });
-    });
-  router
-    .use(checkTokenValidity.bind(config))
-    .route('/:address')
-    .delete((req, res) => {
-      const address = standarizeAddresses([req.params.address])[0];
-
-      const savedAddress = config.get().addresses ?? [];
-
-      if (!savedAddress.find((addr) => addr.address === address))
-        return setStatus(res, { code: 400, message: "MAC address doesn't exist" });
-
-      const filteredAddresses = savedAddress.filter((admin) => admin.address !== address);
-
-      config.set({ addresses: filteredAddresses });
-
-      setStatus(res, { code: 200, message: 'MAC address deleted' });
     });
   return router;
 };

@@ -5,7 +5,7 @@ import { checkAddressesValidity, standarizeAddresses } from 'utils/index';
 import { setStatus } from 'utils/server';
 import { checkBody, checkOrigin } from 'middleware';
 
-export default (config: AppConfig) => {
+export default (config: AppConfig, app: express.Express) => {
   const router = express.Router();
   router.get('/:address', (req, res) => {
     // Addresses from param

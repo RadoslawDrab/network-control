@@ -44,9 +44,9 @@ const config = new Config<Settings>(
 app.use(express.json());
 app.use(cors({ origin }));
 
-app.use('/api/status', status(config));
-app.use('/api/user', user(config));
-app.use('/api/login', login(config));
+app.use('/api/status', status(config, app));
+app.use('/api/user', user(config, app));
+app.use('/api/login', login(config, app));
 
 if (PRODUCTION) app.use('/', express.static(path.resolve('app')));
 
