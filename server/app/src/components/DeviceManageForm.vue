@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { PhX } from '@phosphor-icons/vue';
+import { PhGear, PhX } from '@phosphor-icons/vue';
 
 import useToken from 'composables/useToken';
 import useToast from 'composables/useToast';
@@ -31,6 +31,7 @@ const macAddress = computed(() =>
     : ''
 );
 const deleteDeviceModal = ref<boolean>(false);
+const editDeviceForm = ref<boolean>(false);
 const token = useToken();
 const toast = useToast();
 
@@ -67,6 +68,8 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
 }
 async function deleteDevice() {
   try {
+    if (!address.value.address) throw { message: 'No MAC address provided' };
+
     await auth.promise(`/user/${address.value.address}`, {}, { method: 'DELETE' });
     toast.show('Deleted user', { variant: 'success' });
     emit('delete', address.value);
@@ -80,7 +83,7 @@ async function deleteDevice() {
   <aside>
     <BForm v-if="address" class="form">
       <header class="d-flex justify-content-between" :data-unlocked="currentUnlocks.includes(address.address)">
-        <div>
+        <div class="content">
           <h1>
             {{ address.name }}
             <span v-if="address.shortName">({{ address.shortName }})</span>
@@ -94,15 +97,24 @@ async function deleteDevice() {
             </span>
           </footer>
         </div>
-        <BButton
-          v-if="token.isLoggedIn"
-          @click="() => (deleteDeviceModal = true)"
-          class="p-0 align-self-start"
-          variant="outline-danger"
-          tooltip
-          aria-label="Usuń urządzenie">
-          <PhX class="m-1" weight="bold" size="1.25rem" />
-        </BButton>
+        <div class="vertical align-self-start" v-if="token.isLoggedIn">
+          <BButton
+            @click="() => (deleteDeviceModal = true)"
+            class="p-0"
+            variant="outline-danger"
+            tooltip
+            aria-label="Usuń urządzenie">
+            <PhX class="m-1" weight="bold" size="1.25rem" />
+          </BButton>
+          <!-- <BButton
+            @click="() => (editDeviceForm = true)"
+            class="p-0"
+            variant="outline-secondary"
+            tooltip
+            aria-label="Edytuj urządzenie">
+            <PhGear class="m-1" weight="bold" size="1.25rem" />
+          </BButton> -->
+        </div>
       </header>
       <div>
         <h4>Zmień czas</h4>
@@ -158,6 +170,7 @@ async function deleteDevice() {
         </span>
         <small class="text-secondary"> ({{ macAddress }})</small>
       </BModal>
+      <DeviceFormOffcanvas v-model="editDeviceForm" :default-settings="address" edit @submit="(v) => console.log(v)" />
     </BForm>
     <div v-else>Nie wybrano urządzenia</div>
   </aside>
@@ -166,7 +179,7 @@ async function deleteDevice() {
 .form {
   display: flex;
   flex-direction: column;
-  gap: 2em;
+  gap: 1.5em;
   header {
     border-bottom: 2px solid var(--bs-danger);
     padding-bottom: 1em;
@@ -176,7 +189,7 @@ async function deleteDevice() {
     h1 {
       line-height: 1;
     }
-    div {
+    .content {
       width: 100%;
       footer {
         display: flex;
@@ -194,8 +207,12 @@ async function deleteDevice() {
       display: flex;
       justify-content: center;
       align-items: center;
-      // line-height: 1.1;
     }
+  }
+  .vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
   }
 }
 </style>
