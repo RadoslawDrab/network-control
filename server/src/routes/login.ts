@@ -21,7 +21,7 @@ export default (config: AppConfig, app: express.Express) => {
         adminPasswd = password;
       }
       if (adminPasswd === password) {
-        const time = Date.now() + (adminPasswordCacheTime ?? 60) * 60 * 1000;
+        const time = Date.now() + (adminPasswordCacheTime ?? 3600) * 60 * 1000;
         const token = crypto.AES.encrypt(time.toString(), adminPasswd).toString();
         return res.status(200).json({ token });
       }

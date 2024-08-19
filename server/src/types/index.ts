@@ -4,18 +4,22 @@ export type ConfigType = { [key: string]: string | boolean | number | object | n
 export const settings: SettingsKey[] = ['devices'] as const;
 export type SettingsKey = keyof Settings;
 
-export interface Settings extends ConfigType {
+export type AdminSettings = {
+  /** Time in seconds to show reminder */
+  reminderTime: number;
+  /** Duration in seconds for which password will be kept */
+  adminPasswordCacheTime: number;
+};
+
+export interface Settings extends ConfigType, AdminSettings {
   devices: Device[];
+  adminPassword: string;
   /** Time in miliseconds after which info will be closed */
   showTimeInfoTill: number;
   /** Time in seconds to keep info after reminder */
   showTimeInfoDuration: number;
-  /** Time in seconds to show reminder */
-  reminderTime: number;
-  adminPassword: string;
-  /** Duration for which password will be kept */
-  adminPasswordCacheTime: number;
 }
+
 export type AppConfig = Config<Settings>;
 export type Device = {
   address: string;
@@ -24,3 +28,5 @@ export type Device = {
   name: string;
   shortName?: string;
 };
+
+// export type AdminSettings = Exclude<Settings, 'devices' | 'adminPassword'>;
