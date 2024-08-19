@@ -2,19 +2,19 @@ import { onMounted, onUnmounted, ref } from 'vue';
 
 import { promise } from 'utils/server';
 
-import { Address } from 'types/index';
+import { Device } from 'types/index';
 
 const useDeviceStatus = (
   address?: string | null,
   options: {
     statusInterval?: number;
     startOnMounted?: boolean;
-    onMounted?: () => Promise<Address[]> | Address[];
+    onMounted?: () => Promise<Device[]> | Device[];
     filter?: (address: string, isLocked: boolean) => boolean | void;
   } = { statusInterval: 3000, startOnMounted: true }
 ) => {
   const interval = ref<NodeJS.Timeout>();
-  const addresses = ref<Address[]>([]);
+  const addresses = ref<Device[]>([]);
 
   async function get() {
     try {

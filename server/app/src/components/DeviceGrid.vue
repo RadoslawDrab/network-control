@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue';
 import usePromiseAuth from 'composables/usePromiseAuth';
 import useDeviceStatus from 'composables/useDeviceStatus';
 
-import { Address } from 'types/index';
+import { Device } from 'types/index';
 
 export type Cell = {
   address: string | null;
@@ -42,12 +42,12 @@ const position = defineModel<[number, number] | null>('position', { default: nul
 
 const emit = defineEmits<{
   blur: [cell: Cell];
-  click: [item: Address | null];
+  click: [item: Device | null];
   'lock-change': [currentUnlocks: string[]];
-  'time-change': [address: Address[]];
+  'time-change': [address: Device[]];
 }>();
 
-const auth = usePromiseAuth<Address[]>({
+const auth = usePromiseAuth<Device[]>({
   params: ['/device'],
   onPromise: (v) => {
     currentAddresses.value = v;
@@ -55,7 +55,7 @@ const auth = usePromiseAuth<Address[]>({
   checkAuth: props.checkAuth,
 });
 const grid = ref<Cell[]>([]);
-const currentAddresses = ref<Address[]>([]);
+const currentAddresses = ref<Device[]>([]);
 
 const gridSize = computed(() => ({
   x: Math.max(...grid.value.map((cell) => cell.x + 1), 1),

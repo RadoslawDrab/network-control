@@ -7,10 +7,10 @@ import useToast from 'composables/useToast';
 import usePromiseAuth from 'composables/usePromiseAuth';
 import { promise } from 'utils/server';
 
-import { Address } from 'types/index';
+import { Device } from 'types/index';
 import DeviceGrid from './DeviceGrid.vue';
 
-const address = defineModel<Address | null>({ default: null });
+const address = defineModel<Device | null>({ default: null });
 const props = withDefaults(
   defineProps<{
     locks?: { time: number; value: string }[];
@@ -28,7 +28,7 @@ const props = withDefaults(
     ],
   }
 );
-const emit = defineEmits<{ delete: [address: Address] }>();
+const emit = defineEmits<{ delete: [address: Device] }>();
 
 const macAddress = computed(() =>
   address.value
@@ -68,7 +68,7 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
       {},
       { body: JSON.stringify({ time: `${prefix}${time * 60 * 1000}` }), method: 'POST' }
     );
-    address.value = await promise<Address>(`/device/${address.value.address}`);
+    address.value = await promise<Device>(`/device/${address.value.address}`);
     toast.show(`${note} czas`, { variant: 'success' });
   } catch (error) {
     toast.show('Błąd', { variant: 'danger', body: error.message });
@@ -86,7 +86,7 @@ async function deleteDevice() {
     toast.show('Error', { variant: 'danger', body: error.message });
   }
 }
-async function updateDevice(settings: Address) {
+async function updateDevice(settings: Device) {
   try {
     await auth.promise(`/device/${address.value.address}`, {}, { method: 'PUT', body: JSON.stringify(settings) });
     toast.show('Updated device', { variant: 'success' });

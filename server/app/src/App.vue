@@ -6,7 +6,7 @@ import useToast from 'composables/useToast';
 
 import DeviceGrid from 'components/DeviceGrid.vue';
 import { NavItem } from 'components/MainHeader.vue';
-import { Address } from 'types/index';
+import { Device } from 'types/index';
 
 const show = reactive<{ changePasswordModal: boolean; addDeviceForm: boolean }>({
   changePasswordModal: false,
@@ -21,7 +21,7 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
   },
   { id: 'changePasswordModal', html: 'Zmień hasło', passwordRequired: true },
 ]);
-const selectedAddress = ref<Address | null>(null);
+const selectedAddress = ref<Device | null>(null);
 const currentUnlocks = ref<string[]>([]);
 
 const auth = usePromiseAuth();
@@ -37,7 +37,7 @@ function navCallback(id: string) {
   show[id] = true;
 }
 
-async function onDeviceAdded(settings: Address) {
+async function onDeviceAdded(settings: Device) {
   try {
     await auth.promise('/device', {}, { method: 'POST', body: JSON.stringify(settings) });
     toast.show('Device added', { variant: 'success' });
@@ -45,7 +45,7 @@ async function onDeviceAdded(settings: Address) {
     toast.show('Failed', { variant: 'danger', body: error.message });
   }
 }
-async function onDeviceClick(address: Address) {
+async function onDeviceClick(address: Device) {
   selectedAddress.value = address;
 }
 async function onLockChange(c: string[]) {
