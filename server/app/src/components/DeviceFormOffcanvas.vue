@@ -1,15 +1,22 @@
 <script setup lang="ts">
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
 import { ref } from 'vue';
 
 import useToast from 'composables/useToast';
-
 import useFeedback from 'composables/useFeedback';
+
 import DeviceGrid from './DeviceGrid.vue';
 
 export type CellSettings = { name: string; shortName?: string; address: string; position: [number, number] };
 
-const props = withDefaults(defineProps<{ gridSize?: [number, number] }>(), { gridSize: () => [12, 12] });
+const props = withDefaults(
+  defineProps<{ gridSize?: [number, number]; defaultSettings?: Partial<CellSettings>; edit?: boolean }>(),
+  {
+    gridSize: () => [12, 12],
+    defaultSettings: () => ({}),
+    edit: false,
+  }
+);
 const show = defineModel<boolean>({ default: false });
 const emit = defineEmits<{ submit: [settings: CellSettings] }>();
 
@@ -17,7 +24,7 @@ const toast = useToast();
 const deviceGrid = ref<InstanceType<typeof DeviceGrid>>();
 
 const settings = useFeedback<CellSettings>(
-  {},
+  props.defaultSettings,
   (values) => {
     const shortName = values.shortName ?? values.name?.slice(0, 4);
     return {
@@ -32,8 +39,12 @@ const settings = useFeedback<CellSettings>(
       shortName: shortName?.length < 5 && shortName?.length > 0,
     };
   },
-  ['position']
+  props.defaultSettings ? (Object.keys(props.defaultSettings) as (keyof CellSettings)[]) : ['position']
 );
+
+const enabledAddresses = computed(() => {
+  return props.edit && settings.v.address ? [settings.v.address] : [];
+});
 
 async function onSubmit(event: SubmitEvent) {
   if (settings.allValid.value) {
@@ -41,7 +52,9 @@ async function onSubmit(event: SubmitEvent) {
     await settings.reset();
     form.reset();
     show.value = false;
-    emit('submit', settings.value as CellSettings);
+    console.log(settings.v);
+
+    emit('submit', settings.v as CellSettings);
   } else {
     toast.show('Not enough data', { variant: 'danger' });
   }
@@ -54,9 +67,17 @@ watch(
   },
   { immediate: true }
 );
+watch(settings.v, (v) => {
+  console.log(v);
+});
 </script>
 <template>
-  <BOffcanvas v-model="show" placement="end" width="50%" header-class="border-bottom" title="Dodaj komputer">
+  <BOffcanvas
+    v-model="show"
+    placement="end"
+    width="50%"
+    header-class="border-bottom"
+    :title="`${props.edit ? 'Edytuj' : 'Dodaj'} komputer`">
     <BForm class="form" @submit="onSubmit">
       <BFormGroup>
         <BFormText for="device-name">Nazwa</BFormText>
@@ -116,12 +137,14 @@ watch(
         <DeviceGrid
           ref="deviceGrid"
           v-model:position="settings.v.position"
+          :enabled-addresses="enabledAddresses"
           @blur="() => settings.onTouched('position')"
           :grid-size="props.gridSize"
-          disable-used />
+          disable-used
+          select-by-default />
       </BFormGroup>
       <hr />
-      <BButton class="mt-3" type="submit" variant="outline-primary">Dodaj</BButton>
+      <BButton class="mt-3" type="submit" variant="outline-primary">{{ props.edit ? 'Zaktualizuj' : 'Dodaj' }}</BButton>
     </BForm>
   </BOffcanvas>
 </template>
