@@ -31,15 +31,16 @@ function check<This extends BaseCheckThis>(
   res: express.Response,
   next: express.NextFunction
 ) {
-  if (typeof this.obj !== 'object') return next();
+  if (typeof req[this.obj] !== 'object') return next();
 
-  const keys = Object.keys(req[this.obj]);
+  const obj = req[this.obj];
+  const keys = Object.keys(obj);
   if (
     this.func
       ? this.func(keys, this.values)
-      : this.any && !this.all
-      ? keys.some((k) => this.values?.includes(k) ?? false)
-      : keys.every((k) => this.values?.includes(k) ?? false)
+      : (this.any && !this.all) ?? true
+      ? keys.some((k) => (this.values?.includes(k) && obj[k] !== undefined) ?? false)
+      : keys.every((k) => (this.values?.includes(k) && obj[k] !== undefined) ?? false)
   ) {
     next();
   } else {
@@ -47,7 +48,9 @@ function check<This extends BaseCheckThis>(
     else
       setStatus(res, {
         code: 400,
-        message: `'${this.obj}' has to include ${this.all && !this.any ? 'all' : 'any'} of this props: ${this.values}`,
+        message: `'${this.obj.toString()}' has to include ${this.all && !this.any ? 'all' : 'any'} of this props: ${
+          this.values
+        }`,
       });
   }
 }
