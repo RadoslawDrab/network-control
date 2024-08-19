@@ -28,6 +28,21 @@ export default (config: AppConfig) => {
       res.status(200).json(addresses);
     })
     .use(checkTokenValidity.bind(config))
+    .delete('/:address', (req, res) => {
+      const address = standarizeAddresses([req.params.address])[0];
+
+      const savedAddresses = config.get().addresses ?? [];
+
+      console.log(savedAddresses);
+      if (!savedAddresses.find((addr) => addr.address === address))
+        return setStatus(res, { code: 400, message: "MAC address doesn't exist" });
+
+      const filteredAddresses = savedAddresses.filter((admin) => admin.address !== address);
+
+      config.set({ addresses: filteredAddresses });
+
+      setStatus(res, { code: 200, message: 'MAC address deleted' });
+    })
     .use(
       checkBody.bind({
         values: ['address', 'name', 'position'],
