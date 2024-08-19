@@ -7,11 +7,11 @@ import { setStatus } from 'utils/server';
 import { AppConfig } from 'types';
 import { Status } from 'types/server';
 
-export default (config: AppConfig) => {
+export default (config: AppConfig, app: express.Express) => {
   const router = express.Router();
   router
     .use(checkOrigin)
-    .use(checkHeaders.bind({ values: ['password'], errorMessage: 'No password provided' }))
+    .use(checkHeaders.bind({ values: ['password', 'token'], any: true, errorMessage: 'No password provided' }))
     .get('/token', (req, res) => {
       const password = req.headers['password'] as string;
       const { adminPassword, adminPasswordCacheTime } = config.get();
