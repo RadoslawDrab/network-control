@@ -8,18 +8,26 @@ import usePromiseAuth from 'composables/usePromiseAuth';
 import { promise } from 'utils/server';
 
 import { Address } from 'types/index';
+import DeviceGrid from './DeviceGrid.vue';
 
 const address = defineModel<Address | null>({ default: null });
-const props = withDefaults(defineProps<{ locks?: { time: number; value: string }[]; currentUnlocks: string[] }>(), {
-  address: null,
-  locks: () => [
-    { time: 10, value: '10 min' },
-    { time: 30, value: '30 min' },
-    { time: 60, value: '1h' },
-    { time: 120, value: '2h' },
-    { time: 0, value: 'Resetuj' },
-  ],
-});
+const props = withDefaults(
+  defineProps<{
+    locks?: { time: number; value: string }[];
+    currentUnlocks: string[];
+    deviceGrid?: InstanceType<typeof DeviceGrid>;
+  }>(),
+  {
+    address: null,
+    locks: () => [
+      { time: 10, value: '10 min' },
+      { time: 30, value: '30 min' },
+      { time: 60, value: '1h' },
+      { time: 120, value: '2h' },
+      { time: 0, value: 'Resetuj' },
+    ],
+  }
+);
 const emit = defineEmits<{ delete: [address: Address] }>();
 
 const macAddress = computed(() =>
@@ -78,6 +86,18 @@ async function deleteDevice() {
     toast.show('Error', { variant: 'danger', body: error.message });
   }
 }
+async function updateDevice(settings: Address) {
+  try {
+    await auth.promise(`/device/${address.value.address}`, {}, { method: 'PUT', body: JSON.stringify(settings) });
+    console.log(address.value.position, settings.position);
+
+    toast.show('Updated device', { variant: 'success' });
+    await props.deviceGrid?.auth.get();
+    address.value = settings;
+  } catch (error) {
+    toast.show('Error', { variant: 'danger', body: error.message });
+  }
+}
 </script>
 <template>
   <aside>
@@ -106,14 +126,14 @@ async function deleteDevice() {
             aria-label="Usuń urządzenie">
             <PhX class="m-1" weight="bold" size="1.25rem" />
           </BButton>
-          <!-- <BButton
+          <BButton
             @click="() => (editDeviceForm = true)"
             class="p-0"
             variant="outline-secondary"
             tooltip
             aria-label="Edytuj urządzenie">
             <PhGear class="m-1" weight="bold" size="1.25rem" />
-          </BButton> -->
+          </BButton>
         </div>
       </header>
       <div>
@@ -170,7 +190,7 @@ async function deleteDevice() {
         </span>
         <small class="text-secondary"> ({{ macAddress }})</small>
       </BModal>
-      <DeviceFormOffcanvas v-model="editDeviceForm" :default-settings="address" edit @submit="(v) => console.log(v)" />
+      <DeviceFormOffcanvas v-model="editDeviceForm" :default-settings="address" edit @submit="updateDevice" />
     </BForm>
     <div v-else>Nie wybrano urządzenia</div>
   </aside>
