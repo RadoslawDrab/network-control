@@ -34,6 +34,6 @@ export function checkAddressesValidity(addresses: string | string[]): [boolean, 
 }
 export function getPosition(req: Request): [number, number] {
   const x = Number(req.body?.position?.at(0) ?? 0);
-  const y = Number(req.body?.position?.at(0) ?? 0);
+  const y = Number(req.body?.position?.at(1) ?? 0);
   return [x, y];
 }
