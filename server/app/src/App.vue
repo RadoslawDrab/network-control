@@ -6,11 +6,13 @@ import useToast from 'composables/useToast';
 
 import DeviceGrid from 'components/DeviceGrid.vue';
 import { NavItem } from 'components/MainHeader.vue';
+import { Settings } from 'components/AdminFormOffcanvas.vue';
 import { Device } from 'types/index';
 
-const show = reactive<{ changePasswordModal: boolean; addDeviceForm: boolean }>({
+const show = reactive<{ changePasswordModal: boolean; addDeviceForm: boolean; adminForm: boolean }>({
   changePasswordModal: false,
   addDeviceForm: false,
+  adminForm: false,
 });
 
 const navItems = ref<NavItem<keyof typeof show>[]>([
@@ -20,6 +22,7 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
     passwordRequired: true,
   },
   { id: 'changePasswordModal', html: 'Zmień hasło', passwordRequired: true },
+  // { id: 'adminForm', html: 'Ustawienia administracyjne', passwordRequired: true },
 ]);
 const selectedDevice = ref<Device | null>(null);
 const currentUnlocks = ref<string[]>([]);
@@ -59,6 +62,9 @@ async function onDeviceDelete() {
     await deviceGrid.value.auth.get();
   }
 }
+function onAdminFormSubmit(settings: Settings) {
+  refreshInterval.value = settings.intervalTime;
+}
 </script>
 <template>
   <BContainer class="d-flex flex-column gap-2">
@@ -84,4 +90,5 @@ async function onDeviceDelete() {
   <PasswordModal new-password v-model:show="show.changePasswordModal" />
   <DeviceFormOffcanvas v-model="show.addDeviceForm" @submit="onDeviceAdded" />
   <BToastOrchestrator />
+  <AdminFormOffcanvas v-model="show.adminForm" @submit="onAdminFormSubmit" />
 </template>
