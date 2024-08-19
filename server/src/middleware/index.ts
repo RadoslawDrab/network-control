@@ -3,7 +3,7 @@ import crypto from 'crypto-js';
 
 import { getAddresses } from 'utils/index';
 import { setStatus } from 'utils/server';
-import { origin } from 'index';
+import { origin, PRODUCTION } from 'index';
 
 import { Status } from 'types/server';
 import { AppConfig } from 'types';
@@ -95,7 +95,9 @@ export function checkTokenValidity(
   }
 }
 export function checkOrigin(req: express.Request, res: express.Response, next: express.NextFunction) {
-  const isOrigin = origin.some((o) => o === req.headers.origin);
+  const requestOrigin = PRODUCTION ? req.headers.host : req.headers.origin;
+  const isOrigin = origin.some((o) => requestOrigin && o.includes(requestOrigin));
+
   if (isOrigin) {
     next();
   } else {

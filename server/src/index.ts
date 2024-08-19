@@ -13,9 +13,9 @@ import { Settings } from 'types/index';
 import { standarizeAddresses } from 'utils';
 
 const PORT = process.env._PORT || 3000;
-const HOSTNAME = process.env._HOSTNAME || '127.0.0.1';
-const PRODUCTION = process.env.NODE_ENV === 'production';
-export const origin = [`http://${HOSTNAME}:${PORT}`, `http://localhost:3001`];
+const HOSTNAME = process.env._HOSTNAME || 'localhost';
+export const PRODUCTION = process.env.NODE_ENV === 'production';
+export const origin = PRODUCTION ? [`http://${HOSTNAME}:${PORT}`] : [`http://localhost:3001`];
 const app = express();
 
 const networkInterfaces = os.networkInterfaces();
@@ -36,6 +36,7 @@ const config = new Config<Settings>(
     showTimeInfoTill: 0,
     reminderTime: 5 * 60,
     showTimeInfoDuration: 10,
+    adminPasswordCacheTime: 3600,
     adminPassword: process.env._ADMIN_PASSWORD,
   },
   process.env._ENC_KEY ?? 'data'
@@ -52,5 +53,6 @@ if (PRODUCTION) app.use('/', express.static(path.resolve('app')));
 
 app.listen(PORT, HOSTNAME, () => {
   console.clear();
-  console.log(`Listening on http://${HOSTNAME}:${PORT}`);
+  const url = `http://${HOSTNAME}:${PORT}`;
+  console.log(`Listening on ${url}`);
 });
