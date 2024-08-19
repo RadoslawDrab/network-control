@@ -24,6 +24,8 @@ const props = withDefaults(
     checkAuth?: boolean;
     statusInterval?: number;
     tooltips?: boolean;
+    enabledAddresses?: string[];
+    selectByDefault?: boolean;
   }>(),
   {
     gridSize: () => [12, 12],
@@ -31,10 +33,13 @@ const props = withDefaults(
     checkAuth: false,
     statusInterval: 0,
     tooltips: false,
+    enabledAddresses: () => [],
+    selectByDefault: false,
   }
 );
 
 const position = defineModel<[number, number] | null>('position', { default: null });
+
 const emit = defineEmits<{
   blur: [cell: Cell];
   click: [item: Address | null];
@@ -49,7 +54,6 @@ const auth = usePromiseAuth<Address[]>({
   },
   checkAuth: props.checkAuth,
 });
-
 const grid = ref<Cell[]>([]);
 const currentAddresses = ref<Address[]>([]);
 
@@ -79,12 +83,15 @@ function createGrid(gridX: number, gridY: number) {
   const g: Cell[] = [];
   for (let x = 0; x < Math.max(gridX, 1); x++) {
     for (let y = 0; y < Math.max(gridY, 1); y++) {
-      const currentCell = currentAddresses.value.find((cell) => cell.position[0] === x && cell.position[1] === y);
+      const currentCell =
+        currentAddresses.value.find((cell) => cell.position[0] === x && cell.position[1] === y) ?? null;
+      const isFound = currentCell ? props.enabledAddresses.some((cell) => currentCell?.address === cell) : false;
+
       g.push({
         x,
         y,
         selected: false,
-        disabled: props.disableUsed ? !!currentCell : !currentCell,
+        disabled: isFound ? false : props.disableUsed ? !!currentCell : !currentCell,
         name: currentCell?.name ?? '',
         shortName: currentCell?.shortName ?? currentCell?.name ?? '',
         address: currentCell?.address ?? null,
@@ -95,16 +102,18 @@ function createGrid(gridX: number, gridY: number) {
   const enabledCells = g.filter((cell) => !cell.disabled);
   const disabledCells = g.filter((cell) => cell.disabled);
 
-  const cells = [
-    ...disabledCells,
-    ...enabledCells.map((cell, index) => {
-      if (index === 0 && position.value !== null) {
-        position.value = [cell.x, cell.y];
-        return { ...cell, selected: index === 0 };
-      }
-      return cell;
-    }),
-  ];
+  const cells = props.selectByDefault
+    ? [
+        ...disabledCells,
+        ...enabledCells.map((cell, index) => {
+          if (index === 0 && position.value === null) {
+            position.value = [cell.x, cell.y];
+            return { ...cell, selected: index === 0 };
+          }
+          return cell;
+        }),
+      ]
+    : [...disabledCells, ...enabledCells];
 
   grid.value = cells;
 }
@@ -152,7 +161,7 @@ defineExpose({ auth, gridSize, resetPosition });
       :tooltip="props.tooltips"
       :aria-label="`${item.name} (${item.shortName})`"
       tooltip-fixed>
-      {{ item.shortName.slice(0, 4) }}
+      {{ item.shortName?.slice(0, 4) ?? 'PC' }}
     </button>
   </div>
 </template>
@@ -180,17 +189,19 @@ defineExpose({ auth, gridSize, resetPosition });
     font-size: 0.6rem;
     overflow: hidden;
 
-    &[data-selected='true'] {
-      background-color: var(--bs-primary);
-      color: var(--bs-body-bg);
-      border: 2px solid var(--bs-primary);
-      &[data-unlocked='true'] {
-        border: 2px solid var(--bs-success-border-subtle);
+    &:not(:disabled) {
+      &[data-selected='true'] {
+        background-color: var(--bs-primary);
+        color: var(--bs-body-bg);
+        border: 2px solid var(--bs-primary);
+        &[data-unlocked='true'] {
+          border: 2px solid var(--bs-success-border-subtle);
+        }
       }
-    }
-    &[data-unlocked='true'] {
-      background-color: var(--bs-success);
-      color: var(--bs-body-bg);
+      &[data-unlocked='true'] {
+        background-color: var(--bs-success);
+        color: var(--bs-body-bg);
+      }
     }
     &:disabled {
       background-color: var(--bs-tertiary-bg);
