@@ -44,18 +44,18 @@ const emit = defineEmits<{
   blur: [cell: Cell];
   click: [item: Device | null];
   'lock-change': [currentUnlocks: string[]];
-  'time-change': [address: Device[]];
+  'time-change': [devices: Device[]];
 }>();
 
 const auth = usePromiseAuth<Device[]>({
   params: ['/device'],
   onPromise: (v) => {
-    currentAddresses.value = v;
+    currentDevices.value = v;
   },
   checkAuth: props.checkAuth,
 });
 const grid = ref<Cell[]>([]);
-const currentAddresses = ref<Device[]>([]);
+const currentDevices = ref<Device[]>([]);
 
 const gridSize = computed(() => ({
   x: Math.max(...grid.value.map((cell) => cell.x + 1), 1),
@@ -83,8 +83,7 @@ function createGrid(gridX: number, gridY: number) {
   const g: Cell[] = [];
   for (let x = 0; x < Math.max(gridX, 1); x++) {
     for (let y = 0; y < Math.max(gridY, 1); y++) {
-      const currentCell =
-        currentAddresses.value.find((cell) => cell.position[0] === x && cell.position[1] === y) ?? null;
+      const currentCell = currentDevices.value.find((cell) => cell.position[0] === x && cell.position[1] === y) ?? null;
       const isFound = currentCell ? props.enabledAddresses.some((cell) => currentCell?.address === cell) : false;
 
       g.push({
@@ -122,7 +121,7 @@ function resetPosition() {
 }
 
 watch(
-  [() => props.gridSize, currentAddresses],
+  [() => props.gridSize, currentDevices],
   ([gridSize]) => {
     createGrid(...gridSize);
   },
@@ -149,7 +148,7 @@ defineExpose({ auth, gridSize, resetPosition });
       :key="`${item.x}-${item.y}`"
       @click="
         () => {
-          emit('click', currentAddresses.find((cell) => cell.address === item.address) ?? null);
+          emit('click', currentDevices.find((cell) => cell.address === item.address) ?? null);
           position = [item.x, item.y];
         }
       "

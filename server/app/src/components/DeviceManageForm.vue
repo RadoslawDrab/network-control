@@ -10,7 +10,7 @@ import { promise } from 'utils/server';
 import { Device } from 'types/index';
 import DeviceGrid from './DeviceGrid.vue';
 
-const address = defineModel<Device | null>({ default: null });
+const device = defineModel<Device | null>({ default: null });
 const props = withDefaults(
   defineProps<{
     locks?: { time: number; value: string }[];
@@ -18,7 +18,7 @@ const props = withDefaults(
     deviceGrid?: InstanceType<typeof DeviceGrid>;
   }>(),
   {
-    address: null,
+    device: null,
     locks: () => [
       { time: 10, value: '10 min' },
       { time: 30, value: '30 min' },
@@ -28,11 +28,11 @@ const props = withDefaults(
     ],
   }
 );
-const emit = defineEmits<{ delete: [address: Device] }>();
+const emit = defineEmits<{ delete: [device: Device] }>();
 
 const macAddress = computed(() =>
-  address.value
-    ? address.value.address
+  device.value
+    ? device.value.address
         .split('')
         .reduce((str, letter, i) => (str += letter + (i % 2 === 1 ? ':' : '')), '')
         .replace(/:$/, '')
@@ -64,11 +64,11 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
   }
   try {
     await promise(
-      `/status/${address.value.address}`,
+      `/status/${device.value.address}`,
       {},
       { body: JSON.stringify({ time: `${prefix}${time * 60 * 1000}` }), method: 'POST' }
     );
-    address.value = await promise<Device>(`/device/${address.value.address}`);
+    device.value = await promise<Device>(`/device/${device.value.address}`);
     toast.show(`${note} czas`, { variant: 'success' });
   } catch (error) {
     toast.show('Błąd', { variant: 'danger', body: error.message });
@@ -76,24 +76,24 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
 }
 async function deleteDevice() {
   try {
-    if (!address.value.address) throw { message: 'No MAC address provided' };
+    if (!device.value.address) throw { message: 'No MAC address provided' };
 
-    await auth.promise(`/device/${address.value.address}`, {}, { method: 'DELETE' });
+    await auth.promise(`/device/${device.value.address}`, {}, { method: 'DELETE' });
     toast.show('Deleted device', { variant: 'success' });
-    emit('delete', address.value);
-    address.value = null;
+    emit('delete', device.value);
+    device.value = null;
   } catch (error) {
     toast.show('Error', { variant: 'danger', body: error.message });
   }
 }
 async function updateDevice(settings: Device) {
   try {
-    await auth.promise(`/device/${address.value.address}`, {}, { method: 'PUT', body: JSON.stringify(settings) });
+    await auth.promise(`/device/${device.value.address}`, {}, { method: 'PUT', body: JSON.stringify(settings) });
     toast.show('Updated device', { variant: 'success' });
     await props.deviceGrid?.auth.get();
     const differentPosition =
-      address.value.position[0] !== settings.position[0] || address.value.position[1] !== settings.position[1];
-    address.value = differentPosition ? null : settings;
+      device.value.position[0] !== settings.position[0] || device.value.position[1] !== settings.position[1];
+    device.value = differentPosition ? null : settings;
   } catch (error) {
     toast.show('Error', { variant: 'danger', body: error.message });
   }
@@ -101,19 +101,19 @@ async function updateDevice(settings: Device) {
 </script>
 <template>
   <aside>
-    <BForm v-if="address" class="form">
-      <header class="d-flex justify-content-between" :data-unlocked="currentUnlocks.includes(address.address)">
+    <BForm v-if="device" class="form">
+      <header class="d-flex justify-content-between" :data-unlocked="currentUnlocks.includes(device.address)">
         <div class="content">
           <h1>
-            {{ address.name }}
-            <span v-if="address.shortName">({{ address.shortName }})</span>
+            {{ device.name }}
+            <span v-if="device.shortName">({{ device.shortName }})</span>
           </h1>
           <footer>
             <span class="fs-6 text-body text-body-tertiary">{{ macAddress }}</span>
             <span class="fs-6 text-body text-body-tertiary">
               Odblokowany do:
-              {{ new Date(address.lockAfter).toLocaleTimeString([], { timeStyle: 'short' }) }}
-              ({{ new Date(address.lockAfter).toLocaleDateString([]) }})
+              {{ new Date(device.lockAfter).toLocaleTimeString([], { timeStyle: 'short' }) }}
+              ({{ new Date(device.lockAfter).toLocaleDateString([]) }})
             </span>
           </footer>
         </div>
@@ -185,12 +185,12 @@ async function updateDevice(settings: Device) {
         @ok="deleteDevice">
         Usunąć urządzenie
         <span class="fw-bold">
-          {{ address.name }}
-          <span v-if="address.shortName">({{ address.shortName }})</span>
+          {{ device.name }}
+          <span v-if="device.shortName">({{ device.shortName }})</span>
         </span>
         <small class="text-secondary"> ({{ macAddress }})</small>
       </BModal>
-      <DeviceFormOffcanvas v-model="editDeviceForm" :default-settings="address" edit @submit="updateDevice" />
+      <DeviceFormOffcanvas v-model="editDeviceForm" :default-settings="device" edit @submit="updateDevice" />
     </BForm>
     <div v-else>Nie wybrano urządzenia</div>
   </aside>

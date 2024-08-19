@@ -15,14 +15,14 @@ export default (config: AppConfig, app: express.Express) => {
     const currentTime = Date.now();
 
     // Addresses saved in file
-    const savedAddresses = config.get().addresses ?? [];
+    const savedDevices = config.get().devices ?? [];
     // Same addresses from param and file
-    const filteredAddresses = savedAddresses.filter((savedAddress) => savedAddress.address === address);
+    const filteredDevices = savedDevices.filter((savedDevice) => savedDevice.address === address);
 
-    if (filteredAddresses.length === 0) return setStatus(res, { code: 404, message: 'MAC address not found' });
+    if (filteredDevices.length === 0) return setStatus(res, { code: 404, message: 'Device not found' });
 
     // Lock times from all addresses
-    const lockTimes = filteredAddresses.map((addr) => addr.lockAfter).filter((time) => time && time > 0) as number[];
+    const lockTimes = filteredDevices.map((addr) => addr.lockAfter).filter((time) => time && time > 0) as number[];
 
     // Longest lock time
     const lockTime = Math.max(...lockTimes);
@@ -47,17 +47,16 @@ export default (config: AppConfig, app: express.Express) => {
     .use(checkOrigin)
     .get('/', (req, res) => {
       const currentTime = Date.now();
-      const addresses = config.get().addresses;
+      const devices = config.get().devices;
 
-      const savedAddresses = addresses?.filter((addr) => addr.lockAfter && addr.lockAfter > 0) ?? [];
-      savedAddresses.map((addr) => {
+      const savedDevices = devices?.filter((addr) => addr.lockAfter && addr.lockAfter > 0) ?? [];
+      savedDevices.map((addr) => {
         return { address: addr.address, isLocked: currentTime >= (addr.lockAfter ?? 0) };
       });
 
       res.status(200).json({
         locks:
-          savedAddresses.map((addr) => ({ address: addr.address, isLocked: currentTime >= (addr.lockAfter ?? 0) })) ??
-          [],
+          savedDevices.map((addr) => ({ address: addr.address, isLocked: currentTime >= (addr.lockAfter ?? 0) })) ?? [],
       });
     })
     .post('/', (req, res) => {
@@ -87,11 +86,11 @@ export default (config: AppConfig, app: express.Express) => {
       }
 
       // Addresses saved on server
-      const savedAddresses = config.get().addresses ?? [];
+      const savedDevices = config.get().devices ?? [];
 
-      const currentDevice = savedAddresses.find((savedAddress) => address === savedAddress.address);
+      const currentDevice = savedDevices.find((savedDevice) => address === savedDevice.address);
       if (!currentDevice) {
-        return setStatus(res, { code: 400, message: 'No device with specified MAC address' });
+        return setStatus(res, { code: 404, message: 'Device not found' });
       }
 
       // Time in number type
@@ -122,9 +121,9 @@ export default (config: AppConfig, app: express.Express) => {
       })();
 
       config.set({
-        addresses: [
+        devices: [
           // Filters out addresses present in header
-          ...savedAddresses.filter((savedAddress) => address !== savedAddress.address),
+          ...savedDevices.filter((savedDevice) => address !== savedDevice.address),
           { ...currentDevice, lockAfter },
         ],
       });

@@ -21,7 +21,7 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
   },
   { id: 'changePasswordModal', html: 'Zmień hasło', passwordRequired: true },
 ]);
-const selectedAddress = ref<Device | null>(null);
+const selectedDevice = ref<Device | null>(null);
 const currentUnlocks = ref<string[]>([]);
 
 const auth = usePromiseAuth();
@@ -37,16 +37,16 @@ function navCallback(id: string) {
   show[id] = true;
 }
 
-async function onDeviceAdded(settings: Device) {
+async function onDeviceAdded(device: Device) {
   try {
-    await auth.promise('/device', {}, { method: 'POST', body: JSON.stringify(settings) });
+    await auth.promise('/device', {}, { method: 'POST', body: JSON.stringify(device) });
     toast.show('Device added', { variant: 'success' });
   } catch (error) {
     toast.show('Failed', { variant: 'danger', body: error.message });
   }
 }
-async function onDeviceClick(address: Device) {
-  selectedAddress.value = address;
+async function onDeviceClick(device: Device) {
+  selectedDevice.value = device;
 }
 async function onLockChange(c: string[]) {
   currentUnlocks.value = c;
@@ -73,7 +73,7 @@ async function onDeviceDelete() {
       <BCol>
         <DeviceManageForm
           :currentUnlocks="currentUnlocks"
-          v-model="selectedAddress"
+          v-model="selectedDevice"
           @delete="onDeviceDelete"
           :device-grid="deviceGrid" />
       </BCol>

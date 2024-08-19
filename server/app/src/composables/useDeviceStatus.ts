@@ -14,14 +14,14 @@ const useDeviceStatus = (
   } = { statusInterval: 3000, startOnMounted: true }
 ) => {
   const interval = ref<NodeJS.Timeout>();
-  const addresses = ref<Device[]>([]);
+  const devices = ref<Device[]>([]);
 
   async function get() {
     try {
       const { locks } = await promise<{ locks: { address: string; isLocked: boolean }[] }>('/status');
 
-      if (addresses.value.length > 0) {
-        const value = addresses.value
+      if (devices.value.length > 0) {
+        const value = devices.value
           .filter((cell) => (address ? cell.address === address : true))
           .filter((cell) => {
             if (options?.filter) {
@@ -30,7 +30,7 @@ const useDeviceStatus = (
               return typeof ret === 'boolean' ? ret : true;
             }
           });
-        addresses.value = value;
+        devices.value = value;
       }
       return locks;
     } catch (error) {
@@ -54,7 +54,7 @@ const useDeviceStatus = (
   }
 
   onMounted(async () => {
-    addresses.value = await options.onMounted();
+    devices.value = await options.onMounted();
 
     if (options.startOnMounted) {
       startInterval();
@@ -62,6 +62,6 @@ const useDeviceStatus = (
   });
   onUnmounted(stopInterval);
 
-  return { addresses, get, startInterval, stopInterval };
+  return { devices, get, startInterval, stopInterval };
 };
 export default useDeviceStatus;

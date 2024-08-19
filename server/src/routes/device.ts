@@ -11,34 +11,34 @@ export default (config: AppConfig, app: express.Express) => {
   router
     .use(checkOrigin)
     .get('/:address', (req, res) => {
-      const addresses = config.get().addresses ?? [];
+      const devices = config.get().devices ?? [];
 
-      const address = addresses.find((addr) => addr.address === req.params.address);
+      const device = devices.find((addr) => addr.address === req.params.address);
 
-      if (!address) {
-        return setStatus(res, { code: 400, message: 'MAC address not found' });
+      if (!device) {
+        return setStatus(res, { code: 404, message: 'Device not found' });
       }
 
-      res.status(200).json(address);
+      res.status(200).json(device);
     })
     .get('/', (req, res) => {
-      const addresses = config.get().addresses ?? [];
-      res.status(200).json(addresses);
+      const devices = config.get().devices ?? [];
+      res.status(200).json(devices);
     })
     .use(checkTokenValidity.bind(config))
     .delete('/:address', (req, res) => {
       const address = standarizeAddresses([req.params.address])[0];
 
-      const savedAddresses = config.get().addresses ?? [];
+      const savedDevices = config.get().devices ?? [];
 
-      if (!savedAddresses.find((addr) => addr.address === address))
-        return setStatus(res, { code: 400, message: "MAC address doesn't exist" });
+      if (!savedDevices.find((addr) => addr.address === address))
+        return setStatus(res, { code: 404, message: 'Device not found' });
 
-      const filteredAddresses = savedAddresses.filter((admin) => admin.address !== address);
+      const filteredDevices = savedDevices.filter((admin) => admin.address !== address);
 
-      config.set({ addresses: filteredAddresses });
+      config.set({ devices: filteredDevices });
 
-      setStatus(res, { code: 200, message: 'MAC address deleted' });
+      setStatus(res, { code: 200, message: 'Device deleted' });
     })
     .use(
       checkBody.bind({
@@ -50,18 +50,18 @@ export default (config: AppConfig, app: express.Express) => {
     .put('/:address', (req, res) => {
       const [address, newAddress] = standarizeAddresses([req.params.address, req.body.address ?? '']);
 
-      const savedAddresses = config.get().addresses ?? [];
+      const savedDevices = config.get().devices ?? [];
 
-      const savedAddress = savedAddresses.find((addr) => addr.address === address);
-      if (!savedAddress) return setStatus(res, { code: 400, message: "MAC address doesn't exists" });
+      const savedDevice = savedDevices.find((addr) => addr.address === address);
+      if (!savedDevice) return setStatus(res, { code: 404, message: 'Device not found' });
       const position = getPosition(req);
 
       config.set({
-        addresses: [
-          ...savedAddresses.filter((addr) => addr.address !== address),
+        devices: [
+          ...savedDevices.filter((addr) => addr.address !== address),
           {
-            ...savedAddress,
-            address: newAddress || savedAddress.address,
+            ...savedDevice,
+            address: newAddress || savedDevice.address,
             name: req.body.name,
             position: position,
             shortName: req.body.shortName,
@@ -73,19 +73,19 @@ export default (config: AppConfig, app: express.Express) => {
     .post('/', (req, res) => {
       const address = standarizeAddresses([req.body.address ?? ''])[0];
 
-      const savedAddresses = config.get().addresses ?? [];
+      const savedDevices = config.get().devices ?? [];
 
-      if (savedAddresses.some((addr) => addr.address === address))
-        return setStatus(res, { code: 400, message: 'MAC address already exists' });
+      if (savedDevices.some((addr) => addr.address === address))
+        return setStatus(res, { code: 400, message: 'Device already exists' });
       const position = getPosition(req);
 
-      if (savedAddresses.some((addr) => addr.position[0] === position[0] && addr.position[1] === position[1])) {
+      if (savedDevices.some((addr) => addr.position[0] === position[0] && addr.position[1] === position[1])) {
         return setStatus(res, { code: 400, message: 'Device in this position is already added' });
       }
 
       config.set({
-        addresses: [
-          ...savedAddresses,
+        devices: [
+          ...savedDevices,
           {
             address,
             lockAfter: Date.now(),
@@ -96,7 +96,7 @@ export default (config: AppConfig, app: express.Express) => {
         ],
       });
 
-      setStatus(res, { code: 201, message: 'Added MAC address' });
+      setStatus(res, { code: 201, message: 'Device added' });
     });
   return router;
 };

@@ -31,7 +31,7 @@ const config = new Config<Settings>(
   'data',
   {
     appName: 'network-controller',
-    addresses: [],
+    devices: [],
     adminAddresses: [...serverAddresses],
     showTimeInfoTill: 0,
     reminderTime: 5 * 60,

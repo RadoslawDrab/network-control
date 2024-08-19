@@ -1,11 +1,11 @@
 import { Config } from 'utils/class';
 
 export type ConfigType = { [key: string]: string | boolean | number | object | null; appName: string };
-export const settings: SettingsKey[] = ['addresses'] as const;
+export const settings: SettingsKey[] = ['devices'] as const;
 export type SettingsKey = keyof Settings;
 
 export interface Settings extends ConfigType {
-  addresses: Device[];
+  devices: Device[];
   /** Time in miliseconds after which info will be closed */
   showTimeInfoTill: number;
   /** Time in seconds to keep info after reminder */
