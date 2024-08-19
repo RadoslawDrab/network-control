@@ -1,6 +1,7 @@
 <script setup lang="tsx">
 import { reactive, ref } from 'vue';
 
+import { promise } from 'utils/server';
 import usePromiseAuth from 'composables/usePromiseAuth';
 import useToast from 'composables/useToast';
 
@@ -9,10 +10,16 @@ import { NavItem } from 'components/MainHeader.vue';
 import { Settings } from 'components/AdminFormOffcanvas.vue';
 import { Device } from 'types/index';
 
-const show = reactive<{ changePasswordModal: boolean; addDeviceForm: boolean; adminForm: boolean }>({
+const show = reactive<{
+  changePasswordModal: boolean;
+  addDeviceForm: boolean;
+  adminForm: boolean;
+  showTimeInfo: boolean;
+}>({
   changePasswordModal: false,
   addDeviceForm: false,
   adminForm: false,
+  showTimeInfo: false,
 });
 
 const navItems = ref<NavItem<keyof typeof show>[]>([
@@ -22,6 +29,7 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
     passwordRequired: true,
   },
   { id: 'changePasswordModal', html: 'Zmień hasło', passwordRequired: true },
+  { id: 'showTimeInfo', html: 'Pokaż czas', callback: showTimeInfo },
   // { id: 'adminForm', html: 'Ustawienia administracyjne', passwordRequired: true },
 ]);
 const selectedDevice = ref<Device | null>(null);
@@ -47,7 +55,7 @@ async function onDeviceAdded(device: Device) {
     await deviceGrid.value.auth.get();
     toast.show('Device added', { variant: 'success' });
   } catch (error) {
-    toast.show('Failed', { variant: 'danger', body: error.message });
+    toast.show('Error', { variant: 'danger', body: error.message });
   }
 }
 async function onDeviceClick(device: Device) {
@@ -64,6 +72,14 @@ async function onDeviceDelete() {
 }
 function onAdminFormSubmit(settings: Settings) {
   refreshInterval.value = settings.intervalTime;
+}
+async function showTimeInfo() {
+  try {
+    await promise('/status', {}, { method: 'POST' });
+    toast.show('Pokazano pozostały czas', { variant: 'info' });
+  } catch (error) {
+    toast.show('Błąd', { variant: 'danger', body: error.message });
+  }
 }
 </script>
 <template>
