@@ -6,7 +6,7 @@ import path from 'path';
 import { Config } from 'utils/class';
 
 import status from 'routes/status';
-import user from 'routes/user';
+import device from 'routes/device';
 import login from 'routes/login';
 
 import { Settings } from 'types/index';
@@ -45,7 +45,7 @@ app.use(express.json());
 app.use(cors({ origin }));
 
 app.use('/api/status', status(config, app));
-app.use('/api/user', user(config, app));
+app.use('/api/device', device(config, app));
 app.use('/api/login', login(config, app));
 
 if (PRODUCTION) app.use('/', express.static(path.resolve('app')));

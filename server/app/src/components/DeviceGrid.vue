@@ -48,7 +48,7 @@ const emit = defineEmits<{
 }>();
 
 const auth = usePromiseAuth<Address[]>({
-  params: ['/user'],
+  params: ['/device'],
   onPromise: (v) => {
     currentAddresses.value = v;
   },

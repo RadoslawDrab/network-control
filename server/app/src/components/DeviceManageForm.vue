@@ -60,7 +60,7 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
       {},
       { body: JSON.stringify({ time: `${prefix}${time * 60 * 1000}` }), method: 'POST' }
     );
-    address.value = await promise<Address>(`/user/${address.value.address}`);
+    address.value = await promise<Address>(`/device/${address.value.address}`);
     toast.show(`${note} czas`, { variant: 'success' });
   } catch (error) {
     toast.show('Błąd', { variant: 'danger', body: error.message });
@@ -70,8 +70,8 @@ async function deleteDevice() {
   try {
     if (!address.value.address) throw { message: 'No MAC address provided' };
 
-    await auth.promise(`/user/${address.value.address}`, {}, { method: 'DELETE' });
-    toast.show('Deleted user', { variant: 'success' });
+    await auth.promise(`/device/${address.value.address}`, {}, { method: 'DELETE' });
+    toast.show('Deleted device', { variant: 'success' });
     emit('delete', address.value);
     address.value = null;
   } catch (error) {
