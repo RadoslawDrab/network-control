@@ -39,7 +39,7 @@ function navCallback(id: string) {
 
 async function onDeviceAdded(settings: Address) {
   try {
-    await auth.promise('/user', {}, { method: 'POST', body: JSON.stringify(settings) });
+    await auth.promise('/device', {}, { method: 'POST', body: JSON.stringify(settings) });
     toast.show('Device added', { variant: 'success' });
   } catch (error) {
     toast.show('Failed', { variant: 'danger', body: error.message });
@@ -61,7 +61,7 @@ async function onDeviceDelete() {
 <template>
   <BContainer>
     <MainHeader :navItems="navItems" :callback="navCallback" />
-    <BRow gutter-y="3">
+    <BRow gutter-y="3" align-v="start">
       <BCol cols="auto" class="d-flex justify-content-center">
         <DeviceGrid
           ref="deviceGrid"
@@ -71,7 +71,11 @@ async function onDeviceDelete() {
           tooltips />
       </BCol>
       <BCol>
-        <DeviceManageForm :currentUnlocks="currentUnlocks" v-model="selectedAddress" @delete="onDeviceDelete" />
+        <DeviceManageForm
+          :currentUnlocks="currentUnlocks"
+          v-model="selectedAddress"
+          @delete="onDeviceDelete"
+          :device-grid="deviceGrid" />
       </BCol>
     </BRow>
   </BContainer>
