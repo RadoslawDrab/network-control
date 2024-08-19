@@ -23,7 +23,6 @@ export default (config: AppConfig, app: express.Express) => {
     })
     .get('/', (req, res) => {
       const addresses = config.get().addresses ?? [];
-
       res.status(200).json(addresses);
     })
     .use(checkTokenValidity.bind(config))
@@ -32,7 +31,6 @@ export default (config: AppConfig, app: express.Express) => {
 
       const savedAddresses = config.get().addresses ?? [];
 
-      console.log(savedAddresses);
       if (!savedAddresses.find((addr) => addr.address === address))
         return setStatus(res, { code: 400, message: "MAC address doesn't exist" });
 
@@ -45,9 +43,33 @@ export default (config: AppConfig, app: express.Express) => {
     .use(
       checkBody.bind({
         values: ['address', 'name', 'position'],
-        all: true,
+        all: (req) => req.method === 'POST',
+        any: (req) => req.method === 'PUT',
       })
     )
+    .put('/:address', (req, res) => {
+      const [address, newAddress] = standarizeAddresses([req.params.address, req.body.address ?? '']);
+
+      const savedAddresses = config.get().addresses ?? [];
+
+      const savedAddress = savedAddresses.find((addr) => addr.address === address);
+      if (!savedAddress) return setStatus(res, { code: 400, message: "MAC address doesn't exists" });
+      const position = getPosition(req);
+
+      config.set({
+        addresses: [
+          ...savedAddresses.filter((addr) => addr.address !== address),
+          {
+            ...savedAddress,
+            address: newAddress || savedAddress.address,
+            name: req.body.name,
+            position: position,
+            shortName: req.body.shortName,
+          },
+        ],
+      });
+      setStatus(res, { code: 200, message: 'Updated device' });
+    })
     .post('/', (req, res) => {
       const address = standarizeAddresses([req.body.address ?? ''])[0];
 
