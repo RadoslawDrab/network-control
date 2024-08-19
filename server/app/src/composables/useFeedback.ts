@@ -9,9 +9,7 @@ const useFeedback = <T extends Record<string, any>>(
   const value = reactive<Partial<T>>({ ...defaultValue });
   const isTouched = ref<Partial<Record<keyof T, boolean>>>(isTouchedAlreadyObj);
   const isValid = computed<Partial<Record<keyof T, boolean | null>>>(() => {
-    if (!validity) return {};
-
-    const valid = validity(toValue(value));
+    const valid = validity ? validity(toValue(value)) : toValue(value);
     return Object.keys(valid).reduce((obj, key) => {
       return { ...obj, [key]: isTouched.value && isTouched.value[key] ? valid[key] : null };
     }, valid);
@@ -26,7 +24,7 @@ const useFeedback = <T extends Record<string, any>>(
   }
 
   async function reset() {
-    Object.assign(value, { ...defaultValue });
+    Object.keys(value).forEach((key) => (value[key] = defaultValue[key]));
     isTouched.value = {};
     await nextTick();
   }
