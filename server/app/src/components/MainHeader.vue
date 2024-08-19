@@ -1,18 +1,19 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends string">
 import { ref } from 'vue';
 import useToken from 'composables/useToken';
-import { PhNetwork } from '@phosphor-icons/vue';
+import { PhNetwork, PhSignIn, PhSignOut } from '@phosphor-icons/vue';
 
 export type NavItem<Id = string> = {
   id: Id;
-  html: string;
+  text?: string;
+  html?: string;
   passwordRequired?: boolean;
   callback?: (id: string) => void;
 };
 
 const props = withDefaults(
   defineProps<{
-    navItems: NavItem[];
+    navItems: NavItem<T>[];
     callback?: (id: string) => void;
   }>(),
   { callback: () => {} }
@@ -22,9 +23,13 @@ const token = useToken();
 const showLoginModal = ref<boolean>(false);
 const isValidLogin = ref<boolean>(false);
 
-function itemCallback(item: NavItem) {
-  if (item.passwordRequired && token.isLoggedIn) (item.callback && item.callback(item.id)) ?? props.callback(item.id);
-  else if (!item.passwordRequired) (item.callback && item.callback(item.id)) ?? props.callback(item.id);
+function itemCallback(item: NavItem<T>) {
+  if (item.passwordRequired && token.isLoggedIn) {
+    item.callback && item.callback(item.id);
+  } else if (!item.passwordRequired) {
+    item.callback && item.callback(item.id);
+  }
+  props.callback(item.id);
 }
 </script>
 <template>
@@ -33,24 +38,45 @@ function itemCallback(item: NavItem) {
       <PhNetwork size="1.2em" />
       Network Controller
     </h1>
-    <BNav pills>
+    <BNav pills class="nav">
       <BNavItem
         v-for="item in props.navItems.filter((item) => !item.passwordRequired || token.isLoggedIn)"
         :key="item.id"
         @click="() => itemCallback(item)"
         link-class="d-flex gap-2 align-items-center">
-        <span v-html="item.html"></span>
+        <span v-if="item.html" v-html="item.html"></span>
+        <span v-else class="d-flex gap-2 align-items-center">
+          <slot :="item"></slot>
+          {{ item.text ?? item.id }}
+        </span>
       </BNavItem>
-      <BNavItem class="vertical-line" v-if="!token.isLoggedIn" @click="() => (showLoginModal = true)">
-        Zaloguj się
+      <BNavItem class="vertical-line" link-class="link" v-if="!token.isLoggedIn" @click="() => (showLoginModal = true)">
+        <div class="link">
+          <PhSignIn class="icon" />
+          <span> Zaloguj się </span>
+        </div>
       </BNavItem>
-      <BNavItem class="vertical-line" v-else @click="token.logout"> Wyloguj się </BNavItem>
+      <BNavItem class="vertical-line" link-class="link" v-else @click="token.logout">
+        <div class="link">
+          <PhSignOut class="icon" />
+          <span> Wyloguj się </span>
+        </div>
+      </BNavItem>
     </BNav>
   </header>
   <PasswordModal v-model:show="showLoginModal" v-model="isValidLogin" />
 </template>
 <style scoped lang="scss">
-.vertical-line {
-  border-left: 1px solid var(--bs-secondary-bg);
+.nav {
+  --bs-nav-link-color: var(--bs-body-color);
+  --bs-nav-link-hover-color: var(--bs-primary);
+  .link {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .vertical-line {
+    border-left: 1px solid var(--bs-secondary-bg);
+  }
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup lang="tsx">
 import { reactive, ref } from 'vue';
+import { PhAlarm, PhDesktop, PhPassword } from '@phosphor-icons/vue';
 
 import { promise } from 'utils/server';
 import usePromiseAuth from 'composables/usePromiseAuth';
@@ -25,11 +26,11 @@ const show = reactive<{
 const navItems = ref<NavItem<keyof typeof show>[]>([
   {
     id: 'addDeviceForm',
-    html: 'Dodaj komputer',
+    text: 'Dodaj komputer',
     passwordRequired: true,
   },
-  { id: 'changePasswordModal', html: 'Zmień hasło', passwordRequired: true },
-  { id: 'showTimeInfo', html: 'Pokaż czas', callback: showTimeInfo },
+  { id: 'changePasswordModal', text: 'Zmień hasło', passwordRequired: true },
+  { id: 'showTimeInfo', text: 'Pokaż czas', callback: showTimeInfo },
   // { id: 'adminForm', html: 'Ustawienia administracyjne', passwordRequired: true },
 ]);
 const selectedDevice = ref<Device | null>(null);
@@ -84,7 +85,11 @@ async function showTimeInfo() {
 </script>
 <template>
   <BContainer class="d-flex flex-column gap-2">
-    <MainHeader :navItems="navItems" :callback="navCallback" />
+    <MainHeader :navItems="navItems" :callback="navCallback" v-slot="item">
+      <PhAlarm v-if="item.id === 'showTimeInfo'" class="icon" />
+      <PhDesktop v-if="item.id === 'addDeviceForm'" class="icon" />
+      <PhPassword v-if="item.id === 'changePasswordModal'" class="icon" />
+    </MainHeader>
     <BRow gutter-y="3" align-v="start">
       <BCol cols="auto" class="d-flex justify-content-center">
         <DeviceGrid
@@ -108,3 +113,10 @@ async function showTimeInfo() {
   <BToastOrchestrator />
   <AdminFormOffcanvas v-model="show.adminForm" @submit="onAdminFormSubmit" />
 </template>
+<style lang="scss">
+.icon {
+  --icon-size: 1.15rem;
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+</style>
