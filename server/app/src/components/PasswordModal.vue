@@ -54,12 +54,21 @@ async function check() {
 }
 </script>
 <template>
-  <BModal v-model="show" cancel-title="Anuluj" hide-header centered @ok="onPasswordSubmit">
+  <BModal
+    v-model="show"
+    cancel-title="Anuluj"
+    :title="`${props.newPassword ? 'Zmiana hasła' : 'Logowanie'} administratora`"
+    centered
+    @ok="onPasswordSubmit">
     <BForm @submit="onPasswordSubmit">
-      <BFormText>Podaj {{ props.newPassword ? 'nowe ' : '' }}hasło:</BFormText>
-      <BFormInput v-model="password" type="password"></BFormInput>
-      <BFormText v-if="props.newPassword">Powtórz hasło:</BFormText>
-      <BFormInput v-if="props.newPassword" v-model="passwordConfirmation" type="password"></BFormInput>
+      <BFormText for="password-input">Podaj {{ props.newPassword ? 'nowe ' : '' }}hasło:</BFormText>
+      <BFormInput id="password-input" v-model="password" type="password"></BFormInput>
+      <BFormText for="confirmation-password-input" v-if="props.newPassword">Powtórz hasło:</BFormText>
+      <BFormInput
+        id="confirmation-password-input"
+        v-if="props.newPassword"
+        v-model="passwordConfirmation"
+        type="password"></BFormInput>
     </BForm>
   </BModal>
 </template>

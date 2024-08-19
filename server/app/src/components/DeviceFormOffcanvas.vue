@@ -140,7 +140,7 @@ watch(
           select-by-default />
       </BFormGroup>
       <hr />
-      <BButton class="mt-3" type="submit" variant="outline-primary">{{ props.edit ? 'Zaktualizuj' : 'Dodaj' }}</BButton>
+      <BButton class="mt-3" type="submit" variant="primary">{{ props.edit ? 'Zaktualizuj' : 'Dodaj' }}</BButton>
     </BForm>
   </BOffcanvas>
 </template>
