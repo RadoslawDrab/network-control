@@ -18,9 +18,9 @@ export function checkAddress(req: express.Request, res: express.Response, next: 
 }
 
 type BaseCheckThis = {
-  values: string[];
-  any?: boolean;
-  all?: boolean;
+  values: string[] | ((req: express.Request) => string[]);
+  any?: boolean | ((req: express.Request) => boolean);
+  all?: boolean | ((req: express.Request) => boolean);
   errorMessage?: string;
   func?: (keys: Record<string, any>, values: string[]) => boolean;
 };
@@ -35,12 +35,16 @@ function check<This extends BaseCheckThis>(
 
   const obj = req[this.obj];
   const keys = Object.keys(obj);
+  const any = this.any ? (typeof this.any === 'boolean' ? this.any : this.any(req)) : undefined;
+  const all = this.all ? (typeof this.all === 'boolean' ? this.all : this.all(req)) : undefined;
+  const values = typeof this.values === 'object' ? this.values : this.values(req);
+
   if (
     this.func
-      ? this.func(keys, this.values)
-      : (this.any && !this.all) ?? true
-      ? keys.some((k) => (this.values?.includes(k) && obj[k] !== undefined) ?? false)
-      : keys.every((k) => (this.values?.includes(k) && obj[k] !== undefined) ?? false)
+      ? this.func(keys, values)
+      : (any && !all) ?? true
+      ? values.some((k) => (keys.includes(k) && obj[k] !== undefined) ?? false)
+      : values.every((k) => (keys.includes(k) && obj[k] !== undefined) ?? false)
   ) {
     next();
   } else {
