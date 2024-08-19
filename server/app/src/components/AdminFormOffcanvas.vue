@@ -59,7 +59,7 @@ async function onSubmit() {
     emit('submit', settings.v);
     toast.show('Updated', { variant: 'success' });
   } catch (error) {
-    toast.show('Failed', { variant: 'danger', body: error.message });
+    toast.show('Error', { variant: 'danger', body: error.message });
   } finally {
     show.value = false;
   }

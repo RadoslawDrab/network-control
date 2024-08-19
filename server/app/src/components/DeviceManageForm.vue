@@ -69,7 +69,7 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
       { body: JSON.stringify({ time: `${prefix}${time * 60 * 1000}` }), method: 'POST' }
     );
     device.value = await promise<Device>(`/device/${device.value.address}`);
-    toast.show(`${note} czas`, { variant: 'success' });
+    toast.show(`${note} czas`, { variant: 'info' });
   } catch (error) {
     toast.show('Błąd', { variant: 'danger', body: error.message });
   }

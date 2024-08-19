@@ -55,7 +55,7 @@ async function onSubmit(event: SubmitEvent) {
     form.reset();
     if (!props.edit && props.defaultSettings) await settings.reset();
   } else {
-    toast.show('Not enough data', { variant: 'danger' });
+    toast.show('Error', { variant: 'danger', body: 'Not enough data' });
   }
 }
 

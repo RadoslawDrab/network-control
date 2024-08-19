@@ -49,7 +49,7 @@ async function check() {
     }
     return check;
   } catch (error) {
-    showToast('Failed', { variant: 'danger', body: error.message });
+    showToast('Error', { variant: 'danger', body: error.message });
   }
 }
 </script>
