@@ -1,9 +1,10 @@
 @import 'bootstrap/scss/bootstrap';
 
-[tooltip][aria-label]:not(:disabled) {
+[tooltip='true'][aria-label]:not(:disabled) {
   position: relative;
   &::before {
     content: attr(aria-label);
+    z-index: 100;
     position: absolute;
     top: calc(100% + 0.25em);
     left: 50%;
