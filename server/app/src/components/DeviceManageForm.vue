@@ -89,11 +89,11 @@ async function deleteDevice() {
 async function updateDevice(settings: Address) {
   try {
     await auth.promise(`/device/${address.value.address}`, {}, { method: 'PUT', body: JSON.stringify(settings) });
-    console.log(address.value.position, settings.position);
-
     toast.show('Updated device', { variant: 'success' });
     await props.deviceGrid?.auth.get();
-    address.value = settings;
+    const differentPosition =
+      address.value.position[0] !== settings.position[0] || address.value.position[1] !== settings.position[1];
+    address.value = differentPosition ? null : settings;
   } catch (error) {
     toast.show('Error', { variant: 'danger', body: error.message });
   }
