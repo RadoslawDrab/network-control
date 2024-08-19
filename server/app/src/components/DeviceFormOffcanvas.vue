@@ -36,7 +36,7 @@ const settings = useFeedback<CellSettings>(
           values.position[1] < deviceGrid.value?.gridSize.y
         : false,
       address: !!values.address?.replace(/[^0-9A-F]/gi, '').match(/[0-9A-F]{12}/gi),
-      shortName: shortName?.length < 5 && shortName?.length > 0,
+      shortName: shortName ? shortName.length > 0 && shortName.length < 5 : values.name?.length > 0,
     };
   },
   props.defaultSettings ? (Object.keys(props.defaultSettings) as (keyof CellSettings)[]) : ['position']
@@ -48,13 +48,12 @@ const enabledAddresses = computed(() => {
 
 async function onSubmit(event: SubmitEvent) {
   if (settings.allValid.value) {
-    const form = event.target as HTMLFormElement;
-    await settings.reset();
-    form.reset();
-    show.value = false;
-    console.log(settings.v);
-
     emit('submit', settings.v as CellSettings);
+
+    show.value = false;
+    const form = event.target as HTMLFormElement;
+    form.reset();
+    if (!props.edit && props.defaultSettings) await settings.reset();
   } else {
     toast.show('Not enough data', { variant: 'danger' });
   }
@@ -67,9 +66,6 @@ watch(
   },
   { immediate: true }
 );
-watch(settings.v, (v) => {
-  console.log(v);
-});
 </script>
 <template>
   <BOffcanvas
