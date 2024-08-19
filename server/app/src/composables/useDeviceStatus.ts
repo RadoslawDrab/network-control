@@ -38,7 +38,7 @@ const useDeviceStatus = (
     }
   }
   function startInterval(time: number = options.statusInterval) {
-    if (time === 0) return;
+    if (time <= 0) return;
     clearInterval(interval.value);
 
     interval.value = setInterval(async () => {

@@ -23,6 +23,7 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
 ]);
 const selectedDevice = ref<Device | null>(null);
 const currentUnlocks = ref<string[]>([]);
+const refreshInterval = ref<number>(3000);
 
 const auth = usePromiseAuth();
 const toast = useToast();
@@ -40,6 +41,7 @@ function navCallback(id: string) {
 async function onDeviceAdded(device: Device) {
   try {
     await auth.promise('/device', {}, { method: 'POST', body: JSON.stringify(device) });
+    await deviceGrid.value.auth.get();
     toast.show('Device added', { variant: 'success' });
   } catch (error) {
     toast.show('Failed', { variant: 'danger', body: error.message });
@@ -59,14 +61,14 @@ async function onDeviceDelete() {
 }
 </script>
 <template>
-  <BContainer>
+  <BContainer class="d-flex flex-column gap-2">
     <MainHeader :navItems="navItems" :callback="navCallback" />
     <BRow gutter-y="3" align-v="start">
       <BCol cols="auto" class="d-flex justify-content-center">
         <DeviceGrid
           ref="deviceGrid"
           @click="onDeviceClick"
-          :status-interval="3000"
+          v-model:refresh-interval="refreshInterval"
           @lock-change="onLockChange"
           tooltips />
       </BCol>

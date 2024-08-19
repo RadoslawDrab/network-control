@@ -22,7 +22,6 @@ const props = withDefaults(
     gridSize?: [number, number];
     disableUsed?: boolean;
     checkAuth?: boolean;
-    statusInterval?: number;
     tooltips?: boolean;
     enabledAddresses?: string[];
     selectByDefault?: boolean;
@@ -31,7 +30,6 @@ const props = withDefaults(
     gridSize: () => [12, 12],
     disableUsed: false,
     checkAuth: false,
-    statusInterval: 0,
     tooltips: false,
     enabledAddresses: () => [],
     selectByDefault: false,
@@ -39,6 +37,10 @@ const props = withDefaults(
 );
 
 const position = defineModel<[number, number] | null>('position', { default: null });
+const refreshInterval = defineModel<number>('refreshInterval', {
+  default: 0,
+  validator: (value: number) => value >= 100 || value === 0,
+});
 
 const emit = defineEmits<{
   blur: [cell: Cell];
@@ -62,9 +64,9 @@ const gridSize = computed(() => ({
   y: Math.max(...grid.value.map((cell) => cell.y + 1), 1),
 }));
 
-useDeviceStatus(null, {
-  statusInterval: props.statusInterval,
-  startOnMounted: props.statusInterval > 0,
+const status = useDeviceStatus(null, {
+  statusInterval: refreshInterval.value,
+  startOnMounted: refreshInterval.value > 0,
   onMounted: auth.get,
   filter: (address, isLocked) => {
     grid.value = grid.value.map((cell) => {
@@ -137,6 +139,8 @@ watch(
     );
   }
 );
+watch(refreshInterval, (interval) => status.startInterval(interval));
+
 defineExpose({ auth, gridSize, resetPosition });
 </script>
 <template>
