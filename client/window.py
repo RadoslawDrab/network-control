@@ -1,15 +1,24 @@
 import tkinter
 import math
 from win11toast import notify
-
+from typing import Callable
 
 class Window():
+  target: Callable[..., any] = None 
+  time: int = 1000
   def __init__(self, name: str):
     self.root = tkinter.Tk(name)
     self.hide()
-  def start(self, show: bool = True):
+  def start(self, show: bool = True, target: Callable[..., any] = target, time: int = time):
     if show:
       self.show()
+
+    self.target = target
+    self.time = time
+
+    if target != None:
+      self.worker()
+
     self.root.mainloop()
   def setState(self, show: bool):
     if show: 
@@ -17,14 +26,22 @@ class Window():
     else:
       self.hide()
   def remove(self):
-    self.root.withdraw()
+    self.hide()
     self.root.quit()
   def show(self):
-    self.root.deiconify()
-    self.root.focus_set()
-    self.root.lift()
+    if not self.isRunning():
+      self.root.deiconify()
+      self.root.focus_set()
+      self.root.lift()
   def hide(self):
-    self.root.withdraw()
+    if self.isRunning():
+      self.root.withdraw()
+  def isRunning(self):
+    return self.root.state() == 'normal'
+  def worker(self):
+    self.target()
+    if self.time > 0:
+      self.root.after(max(self.time, 100), self.worker)
 
 
 def createBlockInfo():
@@ -63,4 +80,3 @@ def createTimeInfo(minutes: int):
     else:
       note = 'godzin' 
   notify('INFORMACJA', f'Pozostało: {time} {note} do końca czasu', duration='long', scenario='urgent')
-
