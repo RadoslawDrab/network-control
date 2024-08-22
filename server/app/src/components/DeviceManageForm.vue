@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { PhGear, PhX } from '@phosphor-icons/vue';
+import {
+  PhArrowCircleDown,
+  PhArrowCounterClockwise,
+  PhCircle,
+  PhClockCounterClockwise,
+  PhGear,
+  PhX,
+} from '@phosphor-icons/vue';
 
 import useToken from 'composables/useToken';
 import useToast from 'composables/useToast';
@@ -25,7 +32,6 @@ const props = withDefaults(
       { time: 30, value: '30 min' },
       { time: 60, value: '1h' },
       { time: 120, value: '2h' },
-      { time: 0, value: 'Resetuj' },
     ],
   }
 );
@@ -107,7 +113,7 @@ async function updateDevice(settings: Device) {
   <aside>
     <BForm v-if="device" class="form">
       <header class="d-flex justify-content-between" :data-unlocked="currentUnlocks.includes(device.address)">
-        <div class="content">
+        <div class="header-content">
           <h1>
             {{ device.name }}
             <span v-if="device.shortName">({{ device.shortName }})</span>
@@ -120,7 +126,7 @@ async function updateDevice(settings: Device) {
                 :aria-label="`Urządzenie jest ${isOnline ? 'włączone' : 'wyłączone'}`">
                 <PhCircle weight="fill" size="75%" :data-online="isOnline" />
               </div>
-            <span class="fs-6 text-body text-body-tertiary">{{ macAddress }}</span>
+              <span class="fs-6 text-body text-body-tertiary">{{ macAddress }}</span>
             </div>
             <span class="fs-6 text-body text-body-tertiary">
               Odblokowany do:
@@ -148,9 +154,9 @@ async function updateDevice(settings: Device) {
           </BButton>
         </div>
       </header>
-      <div>
-        <h4>Zmień czas</h4>
+      <div class="content">
         <div class="locks-box">
+          <h4>Zmień czas</h4>
           <BButton
             v-for="lock in props.locks"
             :key="`${lock.time}-${lock.value}`"
@@ -160,10 +166,8 @@ async function updateDevice(settings: Device) {
             {{ lock.value }}
           </BButton>
         </div>
-      </div>
-      <div>
-        <h4>Dodaj czas</h4>
         <div class="locks-box">
+          <h4>Dodaj czas</h4>
           <BButton
             v-for="lock in props.locks.filter((lock) => lock.time > 0)"
             :key="`${lock.time}-${lock.value}`"
@@ -173,10 +177,8 @@ async function updateDevice(settings: Device) {
             +{{ lock.value }}
           </BButton>
         </div>
-      </div>
-      <div>
-        <h4>Usuń czas</h4>
         <div class="locks-box">
+          <h4>Usuń czas</h4>
           <BButton
             v-for="lock in props.locks.filter((lock) => lock.time > 0)"
             :key="`${lock.time}-${lock.value}`"
@@ -186,6 +188,20 @@ async function updateDevice(settings: Device) {
             -{{ lock.value }}
           </BButton>
         </div>
+        <aside>
+          <BButton @click="() => unlock(0, 'change')" variant="outline-danger" class="button">
+            <PhClockCounterClockwise class="icon" />
+            Resetuj czas
+          </BButton>
+          <BButton @click="() => {}" variant="outline-danger" class="button" :disabled="!isOnline">
+            <PhArrowCircleDown class="icon" />
+            Wyłącz
+          </BButton>
+          <BButton @click="() => {}" variant="outline-danger" class="button" :disabled="!isOnline">
+            <PhArrowCounterClockwise class="icon" />
+            Uruchom ponownie
+          </BButton>
+        </aside>
       </div>
       <BModal
         v-model="deleteDeviceModal"
@@ -218,11 +234,11 @@ async function updateDevice(settings: Device) {
     &[data-unlocked='true'] {
       border-color: var(--bs-success);
     }
-    h1 {
-      line-height: 1;
-    }
-    .content {
+    .header-content {
       width: 100%;
+      h1 {
+        line-height: 1;
+      }
       footer {
         display: flex;
         justify-content: space-between;
@@ -233,17 +249,50 @@ async function updateDevice(settings: Device) {
           color: var(--bs-danger);
           [data-online='true'] {
             color: var(--bs-success);
+          }
+        }
       }
     }
   }
-  .locks-box {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.5em;
+  .content {
+    $main-size: 70%;
+    $vertical-gap: 1em;
+    $horizontal-gap: 0.75em;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $vertical-gap;
+    & > * {
+      width: calc($main-size - $horizontal-gap);
+    }
+    aside {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: calc(100% - $main-size);
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+
+      border-left: 1px solid var(--bs-secondary);
+      padding-left: $horizontal-gap;
+    }
+    .locks-box {
+      display: grid;
+      grid-template-columns: repeat(v-bind('props.locks.length'), 1fr);
+      gap: 0 0.5em;
+      & > * {
+        grid-column: 1 / -1;
+      }
+    }
     .button {
+      grid-column: auto;
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 0.25em;
     }
   }
   .vertical {
