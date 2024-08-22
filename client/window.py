@@ -47,11 +47,13 @@ def createTimeInfo(minutes: int):
   time = minutes
   note = 'minut'
 
-  if minutes == 1:
+  if minutes <= 1:
     note = 'minuta'
   elif minutes > 1 and minutes < 5:
     note = 'minuty'
 
+  if minutes < 1:
+    time = 'mniej niż 1'
   if hours > 0:
     time = hours
     if hours == 1:
