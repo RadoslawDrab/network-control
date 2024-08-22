@@ -94,9 +94,11 @@ export function checkTokenValidity(
     return setStatus(res, { code: 401, message: 'Token is invalid' });
   }
 }
-export function checkOrigin(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function checkOrigin(this: boolean, req: express.Request, res: express.Response, next: express.NextFunction) {
   const requestOrigin = PRODUCTION ? req.headers.host : req.headers.origin;
   const isOrigin = origin.some((o) => requestOrigin && o.includes(requestOrigin));
+
+  if (this === true) return isOrigin;
 
   if (isOrigin) {
     next();
