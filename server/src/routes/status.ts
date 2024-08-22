@@ -17,15 +17,12 @@ export default (config: AppConfig, app: express.Express) => {
     // Addresses saved in file
     const savedDevices = config.get().devices ?? [];
     // Same addresses from param and file
-    const filteredDevices = savedDevices.filter((savedDevice) => savedDevice.address === address);
+    const savedDevice = savedDevices.find((savedDevice) => savedDevice.address === address);
 
-    if (filteredDevices.length === 0) return setStatus(res, { code: 404, message: 'Device not found' });
-
-    // Lock times from all addresses
-    const lockTimes = filteredDevices.map((addr) => addr.lockAfter).filter((time) => time && time > 0) as number[];
+    if (!savedDevice) return setStatus(res, { code: 404, message: 'Device not found' });
 
     // Longest lock time
-    const lockTime = Math.max(...lockTimes);
+    const lockTime = savedDevice.lockAfter;
     const remainingSeconds = Math.max(Math.round((lockTime - currentTime) / 1000), 0);
     const isLocked = currentTime >= lockTime;
     const showTimeInfo =
@@ -42,21 +39,30 @@ export default (config: AppConfig, app: express.Express) => {
       remainingSeconds,
       timeInfo: (!isLocked && remindAfter && !endRemind) || showTimeInfo,
     });
+
+    config.set({
+      devices: [
+        ...savedDevices.filter((device) => device.address !== savedDevice.address),
+        { ...savedDevice, lastOnline: currentTime },
+      ],
+    });
   });
   router
     .use(checkOrigin)
     .get('/', (req, res) => {
       const currentTime = Date.now();
-      const devices = config.get().devices;
+      const devices = config.get()?.devices ?? [];
+      const deviceTimeout = config.get()?.deviceTimeout ?? 30;
 
-      const savedDevices = devices?.filter((addr) => addr.lockAfter && addr.lockAfter > 0) ?? [];
-      savedDevices.map((addr) => {
-        return { address: addr.address, isLocked: currentTime >= (addr.lockAfter ?? 0) };
-      });
+      const savedDevices = devices?.filter((device) => device.lockAfter && device.lockAfter > 0) ?? [];
 
       res.status(200).json({
         locks:
-          savedDevices.map((addr) => ({ address: addr.address, isLocked: currentTime >= (addr.lockAfter ?? 0) })) ?? [],
+          savedDevices.map((device) => ({ address: device.address, isLocked: currentTime >= device.lockAfter })) ?? [],
+        online: savedDevices.map((device) => ({
+          address: device.address,
+          isOnline: (currentTime - device.lastOnline) / 1000 < deviceTimeout,
+        })),
       });
     })
     .post('/', (req, res) => {

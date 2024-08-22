@@ -35,6 +35,7 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
 ]);
 const selectedDevice = ref<Device | null>(null);
 const currentUnlocks = ref<string[]>([]);
+const currentOnline = ref<string[]>([]);
 const refreshInterval = ref<number>(3000);
 
 const auth = usePromiseAuth();
@@ -64,6 +65,9 @@ async function onDeviceClick(device: Device) {
 }
 async function onLockChange(c: string[]) {
   currentUnlocks.value = c;
+}
+async function onOnlineChange(c: string[]) {
+  currentOnline.value = c;
 }
 async function onDeviceDelete() {
   if (deviceGrid.value) {
@@ -97,11 +101,13 @@ async function showTimeInfo() {
           @click="onDeviceClick"
           v-model:refresh-interval="refreshInterval"
           @lock-change="onLockChange"
+          @online-change="onOnlineChange"
           tooltips />
       </BCol>
       <BCol>
         <DeviceManageForm
-          :currentUnlocks="currentUnlocks"
+          :current-unlocks="currentUnlocks"
+          :current-online="currentOnline"
           v-model="selectedDevice"
           @delete="onDeviceDelete"
           :device-grid="deviceGrid" />

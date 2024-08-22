@@ -15,6 +15,7 @@ const props = withDefaults(
   defineProps<{
     locks?: { time: number; value: string }[];
     currentUnlocks: string[];
+    currentOnline: string[];
     deviceGrid?: InstanceType<typeof DeviceGrid>;
   }>(),
   {
@@ -37,6 +38,9 @@ const macAddress = computed(() =>
         .reduce((str, letter, i) => (str += letter + (i % 2 === 1 ? ':' : '')), '')
         .replace(/:$/, '')
     : ''
+);
+const isOnline = computed(() =>
+  device.value ? props.currentOnline.some((address) => device.value.address === address) : false
 );
 const deleteDeviceModal = ref<boolean>(false);
 const editDeviceForm = ref<boolean>(false);
@@ -109,7 +113,15 @@ async function updateDevice(settings: Device) {
             <span v-if="device.shortName">({{ device.shortName }})</span>
           </h1>
           <footer>
+            <div class="d-flex align-items-center gap-1">
+              <div
+                class="icon d-flex justify-content-center align-items-end"
+                tooltip
+                :aria-label="`Urządzenie jest ${isOnline ? 'włączone' : 'wyłączone'}`">
+                <PhCircle weight="fill" size="75%" :data-online="isOnline" />
+              </div>
             <span class="fs-6 text-body text-body-tertiary">{{ macAddress }}</span>
+            </div>
             <span class="fs-6 text-body text-body-tertiary">
               Odblokowany do:
               {{ new Date(device.lockAfter).toLocaleTimeString([], { timeStyle: 'short' }) }}
@@ -216,6 +228,11 @@ async function updateDevice(settings: Device) {
         justify-content: space-between;
         gap: 1em;
         margin-right: 1em;
+        .icon {
+          aspect-ratio: 1 / 1;
+          color: var(--bs-danger);
+          [data-online='true'] {
+            color: var(--bs-success);
       }
     }
   }

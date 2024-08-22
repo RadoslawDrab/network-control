@@ -9,6 +9,7 @@ export type AdminSettings = {
   reminderTime: number;
   /** Duration in seconds for which password will be kept */
   adminPasswordCacheTime: number;
+  deviceTimeout: number;
 };
 
 export interface Settings extends ConfigType, AdminSettings {
@@ -23,10 +24,11 @@ export interface Settings extends ConfigType, AdminSettings {
 export type AppConfig = Config<Settings>;
 export type Device = {
   address: string;
-  lockAfter?: number;
+  lockAfter: number;
   position: [number, number];
   name: string;
   shortName?: string;
+  lastOnline: number;
 };
 
 // export type AdminSettings = Exclude<Settings, 'devices' | 'adminPassword'>;

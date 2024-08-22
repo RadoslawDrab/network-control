@@ -22,7 +22,7 @@ export default (config: AppConfig, app: express.Express) => {
       res.status(200).json(device);
     })
     .get('/', (req, res) => {
-      const devices = config.get().devices ?? [];
+      const devices = config.get()?.devices ?? [];
       res.status(200).json(devices);
     })
     .use(checkTokenValidity.bind(config))
@@ -92,6 +92,7 @@ export default (config: AppConfig, app: express.Express) => {
             position,
             name: req.body.name,
             shortName: req.body.shortName,
+            lastOnline: Date.now(),
           },
         ],
       });

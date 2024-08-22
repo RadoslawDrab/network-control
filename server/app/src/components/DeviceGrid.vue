@@ -15,6 +15,7 @@ export type Cell = {
   name: string;
   shortName: string;
   unlocked: boolean;
+  online: boolean;
 };
 
 const props = withDefaults(
@@ -46,6 +47,7 @@ const emit = defineEmits<{
   blur: [cell: Cell];
   click: [item: Device | null];
   'lock-change': [currentUnlocks: string[]];
+  'online-change': [currentOnline: string[]];
   'time-change': [devices: Device[]];
 }>();
 
@@ -68,12 +70,13 @@ const status = useDeviceStatus(null, {
   statusInterval: refreshInterval.value,
   startOnMounted: refreshInterval.value > 0,
   onMounted: auth.get,
-  filter: (address, isLocked) => {
+  filter: (address, isLocked, isOnline) => {
     grid.value = grid.value.map((cell) => {
       if (address !== null && cell.address === address) {
         return {
           ...cell,
           unlocked: !isLocked,
+          online: isOnline,
         };
       }
       return cell;
@@ -97,6 +100,7 @@ function createGrid(gridX: number, gridY: number) {
         shortName: currentCell?.shortName ?? currentCell?.name ?? '',
         address: currentCell?.address ?? null,
         unlocked: false,
+        online: false,
       });
     }
   }
@@ -139,6 +143,15 @@ watch(
     );
   }
 );
+watch(
+  () => grid.value.filter((cell) => cell.online),
+  (cells) => {
+    emit(
+      'online-change',
+      cells.map((cell) => cell.address)
+    );
+  }
+);
 watch(refreshInterval, (interval) => status.startInterval(interval));
 
 defineExpose({ auth, gridSize, resetPosition });
@@ -157,12 +170,14 @@ defineExpose({ auth, gridSize, resetPosition });
         }
       "
       :style="`--x: ${item.x + 1}; --y: ${item.y + 1}`"
+      :data-used="item.address !== null"
       :data-selected="position && grid[index].x === position[0] && grid[index].y === position[1]"
       :data-unlocked="item.unlocked"
+      :data-online="item.online"
       :disabled="item.disabled"
       @blur="() => emit('blur', item)"
       :tooltip="props.tooltips"
-      :aria-label="`${item.name} (${item.shortName})`"
+      :aria-label="`${item.name} (${item.shortName}): ${item.online ? 'online' : 'offline'}`"
       tooltip-fixed>
       {{ item.shortName?.slice(0, 4) ?? 'PC' }}
     </button>
@@ -192,23 +207,69 @@ defineExpose({ auth, gridSize, resetPosition });
     font-size: 0.6rem;
     overflow: hidden;
 
+    --pulse-bg-color-1: var(--bs-body-bg);
+    --pulse-border-color-1: var(--bs-border-color);
+    --pulse-color-1: var(--bs-body);
+
+    --pulse-bg-color-2: var(--pulse-bg-color-1);
+    --pulse-border-color-2: var(--pulse-border-color-1);
+    --pulse-color-2: var(--pulse-color-1);
     &:not(:disabled) {
-      &[data-selected='true'] {
-        background-color: var(--bs-primary);
-        color: var(--bs-body-bg);
-        border: 2px solid var(--bs-primary);
+      border: 2px solid var(--bs-tertiary-bg);
+      animation: pulse 2s infinite ease;
+
+      &[data-used='true'] {
+        --pulse-border-color-1: var(--bs-tertiary-color);
         &[data-unlocked='true'] {
-          border: 2px solid var(--bs-success-border-subtle);
+          --pulse-bg-color-1: var(--bs-success);
+          --pulse-border-color-1: var(--bs-success);
+          --pulse-color-1: var(--bs-body-bg);
+        }
+        &[data-online='false'] {
+          --pulse-bg-color-1: var(--bs-tertiary-bg);
+          --pulse-border-color-1: var(--bs-danger);
+          --pulse-border-color-2: var(--bs-danger-bg-subtle);
+          --pulse-color-1: var(--bs-body);
         }
       }
-      &[data-unlocked='true'] {
-        background-color: var(--bs-success);
-        color: var(--bs-body-bg);
+      &[data-selected='true'] {
+        --pulse-bg-color-1: var(--bs-primary);
+        --pulse-border-color-1: var(--bs-primary);
+        --pulse-color-1: var(--bs-body-bg);
+
+        &[data-used='true'] {
+          &[data-unlocked='true'] {
+            --pulse-border-color-1: var(--bs-success-text-emphasis);
+          }
+          &[data-online='false'] {
+            --pulse-border-color-1: var(--bs-danger);
+            --pulse-bg-color-1: var(--bs-danger);
+            --pulse-bg-color-2: var(--bs-danger-bg-subtle);
+            --pulse-color-1: var(--bs-body-bg);
+          }
+        }
       }
     }
     &:disabled {
-      background-color: var(--bs-tertiary-bg);
+      --pulse-bg-color-1: var(--bs-tertiary-bg);
     }
+  }
+}
+@keyframes pulse {
+  0% {
+    border-color: var(--pulse-border-color-1);
+    background-color: var(--pulse-bg-color-1);
+    color: var(--pulse-color-1);
+  }
+  50% {
+    border-color: var(--pulse-border-color-2);
+    background-color: var(--pulse-bg-color-2);
+    color: var(--pulse-color-2);
+  }
+  100% {
+    border-color: var(--pulse-border-color-1);
+    background-color: var(--pulse-bg-color-1);
+    color: var(--pulse-color-1);
   }
 }
 </style>
