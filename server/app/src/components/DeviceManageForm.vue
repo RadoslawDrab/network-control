@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import {
+  PhAlarm,
   PhArrowCircleDown,
   PhArrowCounterClockwise,
   PhCircle,
@@ -80,6 +81,32 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
     );
     device.value = await promise<Device>(`/device/${device.value.address}`);
     toast.show(`${note} czas`, { variant: 'info' });
+  } catch (error) {
+    toast.show('Błąd', { variant: 'danger', body: error.message });
+  }
+}
+async function set(type: 'restart' | 'shutdown' | 'time') {
+  let note: string;
+  switch (type) {
+    case 'restart':
+      note = 'Rozpoczęto restart urządzenia';
+      break;
+    case 'shutdown':
+      note = 'Rozpoczęto wyłączenie urządzenia';
+      break;
+    case 'time':
+      note = 'Pokazano czas na urządzeniu';
+      break;
+  }
+  try {
+    if (!device.value.address) throw { message: 'No MAC address provided' };
+
+    await promise(
+      `/status/set/${device.value.address}`,
+      {},
+      { method: 'POST', body: JSON.stringify({ [type]: true }) }
+    );
+    toast.show(note, { variant: 'info' });
   } catch (error) {
     toast.show('Błąd', { variant: 'danger', body: error.message });
   }
@@ -189,15 +216,19 @@ async function updateDevice(settings: Device) {
           </BButton>
         </div>
         <aside>
-          <BButton @click="() => unlock(0, 'change')" variant="outline-danger" class="button">
+          <BButton @click="() => set('time')" variant="outline-primary" class="button">
+            <PhAlarm class="icon" />
+            Pokaż czas
+          </BButton>
+          <BButton @click="() => unlock(0, 'change')" variant="outline-primary" class="button">
             <PhClockCounterClockwise class="icon" />
             Resetuj czas
           </BButton>
-          <BButton @click="() => {}" variant="outline-danger" class="button" :disabled="!isOnline">
+          <BButton @click="() => set('shutdown')" variant="outline-danger" class="button" :disabled="!isOnline">
             <PhArrowCircleDown class="icon" />
             Wyłącz
           </BButton>
-          <BButton @click="() => {}" variant="outline-danger" class="button" :disabled="!isOnline">
+          <BButton @click="() => set('restart')" variant="outline-danger" class="button" :disabled="!isOnline">
             <PhArrowCounterClockwise class="icon" />
             Uruchom ponownie
           </BButton>

@@ -92,7 +92,10 @@ export default (config: AppConfig, app: express.Express) => {
             position,
             name: req.body.name,
             shortName: req.body.shortName,
-            lastOnline: Date.now(),
+            lastOnline: 0,
+            showTime: 0,
+            restartTime: 0,
+            shutdownTime: 0,
           },
         ],
       });

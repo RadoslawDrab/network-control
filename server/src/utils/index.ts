@@ -37,3 +37,30 @@ export function getPosition(req: Request): [number, number] {
   const y = Number(req.body?.position?.at(1) ?? 0);
   return [x, y];
 }
+export function filterKeys<Value, Obj extends Record<string, Value>>(
+  obj: Obj,
+  func: (key: keyof Obj, value: Value, index: number) => void | boolean
+): Obj {
+  return Object.keys(obj)
+    .filter((key, index) => {
+      const value = obj[key];
+      const ret = func(key, value, index);
+      return typeof ret === 'boolean' ? ret : true;
+    })
+    .reduce((o, key) => ({ ...o, [key]: obj[key] }), {}) as Obj;
+}
+export function keys<Value, Obj extends Record<string, Value>>(
+  obj: Obj,
+  func?: (key: keyof Obj, value: Value, index: number) => void | boolean
+): { key: keyof Obj; value: Value }[] {
+  return Object.keys(obj)
+    .filter((key, index) => {
+      if (func) {
+        const value = obj[key];
+        const ret = func(key, value, index);
+        return typeof ret === 'boolean' ? ret : true;
+      }
+      return true;
+    })
+    .map((key) => ({ key, value: obj[key] }));
+}

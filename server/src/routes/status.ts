@@ -1,9 +1,9 @@
 import express from 'express';
 import { AppConfig } from 'types/index';
 
-import { checkAddressesValidity, standarizeAddresses } from 'utils/index';
+import { checkAddressesValidity, keys, standarizeAddresses } from 'utils/index';
 import { setStatus } from 'utils/server';
-import { checkBody, checkOrigin } from 'middleware';
+import { checkBody, CheckCall, checkOrigin } from 'middleware';
 
 export default (config: AppConfig, app: express.Express) => {
   const router = express.Router();
@@ -37,7 +37,9 @@ export default (config: AppConfig, app: express.Express) => {
       isLocked,
       requestTime: currentTime,
       remainingSeconds,
-      timeInfo: (!isLocked && remindAfter && !endRemind) || showTimeInfo,
+      timeInfo: (!isLocked && remindAfter && !endRemind) || showTimeInfo || currentTime < savedDevice.showTime,
+      restart: currentTime < savedDevice.restartTime,
+      shutdown: currentTime < savedDevice.shutdownTime,
     });
 
     config.set({
@@ -69,6 +71,41 @@ export default (config: AppConfig, app: express.Express) => {
       const currentTime = Date.now();
       config.set({ showTimeInfoTill: currentTime + (config.get().showTimeInfoDuration ?? 1) * 1000 });
       setStatus(res, { code: 200, message: 'Time info set' });
+    })
+    .post('/set/:address', (req, res) => {
+      const currentTime = Date.now();
+      const address = standarizeAddresses([req.params.address])[0];
+      type Call = CheckCall<'time' | 'restart' | 'shutdown', boolean>;
+      const [bodyValid, body] = checkBody.call<Call[0], Call[1], Call[2]>(
+        { values: ['time', 'restart', 'shutdown'], any: true },
+        req,
+        res
+      );
+      if (!bodyValid || !body) return;
+
+      const devices = config.get()?.devices ?? [];
+      const device = devices.find((device) => device.address === address);
+
+      if (!device) {
+        return setStatus(res, { code: 404, message: 'Device not found' });
+      }
+
+      const values = keys<boolean, typeof body>(body, (key, value) => typeof value === 'boolean').reduce<
+        Partial<Record<'showTime' | 'restartTime' | 'shutdownTime', number>>
+      >((obj, { key, value }) => {
+        const newTime = value ? currentTime + (config.get().showTimeInfoDuration ?? 1) * 1000 : 0;
+        switch (key) {
+          case 'restart':
+            return { ...obj, restartTime: newTime };
+          case 'time':
+            return { ...obj, showTime: newTime };
+          case 'shutdown':
+            return { ...obj, shutdownTime: newTime };
+        }
+      }, {});
+
+      config.set({ devices: [...devices.filter((d) => d.address !== device.address), { ...device, ...values }] });
+      setStatus(res, { code: 200, message: 'Commands for device set' });
     })
     .use(
       checkBody.bind({

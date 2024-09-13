@@ -29,6 +29,9 @@ export type Device = {
   name: string;
   shortName?: string;
   lastOnline: number;
+  showTime: number;
+  restartTime: number;
+  shutdownTime: number;
 };
 
 // export type AdminSettings = Exclude<Settings, 'devices' | 'adminPassword'>;

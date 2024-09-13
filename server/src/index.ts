@@ -10,6 +10,7 @@ import { Config } from 'utils/class';
 import status from 'routes/status';
 import device from 'routes/device';
 import login from 'routes/login';
+import admin from 'routes/admin';
 
 import { Settings } from 'types/index';
 import { standarizeAddresses } from 'utils';
@@ -40,6 +41,7 @@ const config = new Config<Settings>(
     showTimeInfoTill: 0,
     reminderTime: 5 * 60,
     showTimeInfoDuration: 10,
+    deviceTimeout: 30,
     adminPasswordCacheTime: 3600,
     adminPassword: process.env._ADMIN_PASSWORD,
   },
@@ -52,6 +54,7 @@ app.use(cors({ origin }));
 app.use('/api/status', status(config, app));
 app.use('/api/device', device(config, app));
 app.use('/api/login', login(config, app));
+app.use('/api/admin', admin(config, app));
 
 if (PRODUCTION)
   app
