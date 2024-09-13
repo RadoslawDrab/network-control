@@ -17,21 +17,28 @@ export function checkAddress(req: express.Request, res: express.Response, next: 
   }
 }
 
-type BaseCheckThis = {
-  values: string[] | ((req: express.Request) => string[]);
+type BaseCheckThis<T extends string> = {
+  values: T[] | ((req: express.Request) => T[]);
   any?: boolean | ((req: express.Request) => boolean);
   all?: boolean | ((req: express.Request) => boolean);
   errorMessage?: string;
+  disableErrorMessage?: boolean;
   func?: (keys: Record<string, any>, values: string[]) => boolean;
 };
+interface This<T extends string> extends BaseCheckThis<T> {
+  obj: keyof express.Request;
+}
 
-function check<This extends BaseCheckThis>(
-  this: This & { obj: keyof express.Request },
+function check<T extends string, Value = any>(
+  this: This<T>,
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
-) {
-  if (typeof req[this.obj] !== 'object') return next();
+  next?: express.NextFunction
+): [boolean, Partial<Record<T, Value>> | null] {
+  if (typeof req[this.obj] !== 'object') {
+    next && next();
+    return [true, null];
+  }
 
   const obj = req[this.obj];
   const keys = Object.keys(obj);
@@ -46,34 +53,46 @@ function check<This extends BaseCheckThis>(
       ? values.some((k) => (keys.includes(k) && obj[k] !== undefined) ?? false)
       : values.every((k) => (keys.includes(k) && obj[k] !== undefined) ?? false)
   ) {
-    next();
+    if (next) next();
+    return [true, obj];
   } else {
-    if (this.errorMessage) setStatus(res, { code: 400, message: this.errorMessage });
-    else
-      setStatus(res, {
-        code: 400,
-        message: `'${this.obj.toString()}' has to include ${this.all && !this.any ? 'all' : 'any'} of this props: ${
-          this.values
-        }`,
-      });
+    if (!this.disableErrorMessage) {
+      if (this.errorMessage) setStatus(res, { code: 400, message: this.errorMessage });
+      else
+        setStatus(res, {
+          code: 400,
+          message: `'${this.obj.toString()}' has to include ${this.all && !this.any ? 'all' : 'any'} of this props: ${
+            this.values
+          }`,
+        });
+    }
+    return [false, null];
   }
 }
 
-export function checkHeaders(
-  this: BaseCheckThis,
+type CheckFuncParams<T extends string, Value = any> = Parameters<typeof check<T, Value>>;
+export type CheckCall<T extends string, Value = any> = [
+  BaseCheckThis<T>,
+  CheckFuncParams<T, Value>,
+  [boolean, Partial<Record<T, Value>> | null]
+];
+export function checkHeaders<T extends string, Value = any>(
+  this: BaseCheckThis<T>,
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  next?: express.NextFunction
 ) {
-  return check.call({ obj: 'headers', ...this }, req, res, next);
+  type Call = CheckCall<T, Value>;
+  return check.call<This<T>, Call[1], Call[2]>({ obj: 'headers', ...this }, req, res, next);
 }
-export function checkBody(
-  this: BaseCheckThis,
+export function checkBody<T extends string, Value = any>(
+  this: BaseCheckThis<T>,
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  next?: express.NextFunction
 ) {
-  return check.call({ obj: 'body', ...this }, req, res, next);
+  type Call = CheckCall<T, Value>;
+  return check.call<This<T>, Call[1], Call[2]>({ obj: 'body', ...this }, req, res, next);
 }
 
 export function checkTokenValidity(
