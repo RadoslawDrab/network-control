@@ -32,6 +32,13 @@ export default (config: AppConfig, app: express.Express) => {
     const endRemind =
       remainingSeconds < (config.get().reminderTime ?? 5 * 60) - (config.get().showTimeInfoDuration ?? 10);
 
+    config.set({
+      devices: [
+        ...savedDevices.filter((device) => device.address !== savedDevice.address),
+        { ...savedDevice, lastOnline: currentTime },
+      ],
+    });
+
     res.status(200).json({
       lockAfter: lockTime,
       isLocked,
@@ -40,13 +47,6 @@ export default (config: AppConfig, app: express.Express) => {
       timeInfo: (!isLocked && remindAfter && !endRemind) || showTimeInfo || currentTime < savedDevice.showTime,
       restart: currentTime < savedDevice.restartTime,
       shutdown: currentTime < savedDevice.shutdownTime,
-    });
-
-    config.set({
-      devices: [
-        ...savedDevices.filter((device) => device.address !== savedDevice.address),
-        { ...savedDevice, lastOnline: currentTime },
-      ],
     });
   });
   router
