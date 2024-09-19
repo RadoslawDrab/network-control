@@ -11,6 +11,10 @@ const useDeviceStatus = (
     startOnMounted?: boolean;
     onMounted?: () => Promise<Device[]> | Device[];
     filter?: (address: string, isLocked: boolean, isOnline: boolean) => boolean | void;
+    onPromise?: (
+      locks: { address: string; isLocked: boolean }[],
+      online: { address: string; isOnline: boolean }[]
+    ) => void;
   } = { statusInterval: 3000, startOnMounted: true }
 ) => {
   const interval = ref<NodeJS.Timeout>();
@@ -31,13 +35,14 @@ const useDeviceStatus = (
               const findHandler = (c: { address: string }) => c.address === cell.address;
               const lock = locks.find(findHandler);
               const onlineDevice = online.find(findHandler);
-
               const ret = options.filter(cell.address, lock?.isLocked ?? true, onlineDevice?.isOnline ?? true);
               return typeof ret === 'boolean' ? ret : true;
             }
+            return true;
           });
         devices.value = value;
       }
+      options.onPromise && options.onPromise(locks, online);
       return { locks, online };
     } catch (error) {
       throw error;
