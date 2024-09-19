@@ -23,6 +23,7 @@ declare module 'vue' {
     BOffcanvas: typeof import('bootstrap-vue-next')['BOffcanvas']
     BRow: typeof import('bootstrap-vue-next')['BRow']
     BToastOrchestrator: typeof import('bootstrap-vue-next')['BToastOrchestrator']
+    ConfirmationModal: typeof import('./src/components/ConfirmationModal.vue')['default']
     DeviceFormOffcanvas: typeof import('./src/components/DeviceFormOffcanvas.vue')['default']
     DeviceGrid: typeof import('./src/components/DeviceGrid.vue')['default']
     DeviceManageForm: typeof import('./src/components/DeviceManageForm.vue')['default']
