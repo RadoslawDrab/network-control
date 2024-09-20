@@ -100,6 +100,8 @@ def get():
 
         isLocked = data.get('isLocked')
         timeInfo = data.get('timeInfo')
+        shutdown = data.get('shutdown')
+        restart = data.get('restart')
         remainingSeconds = data.get('remainingSeconds')
         remainingTime = 0
         if remainingSeconds != None:
@@ -111,6 +113,11 @@ def get():
           createdInfo = True
         elif not timeInfo and createdInfo:
           createdInfo = False
+
+        if shutdown == True:
+          os.system('shutdown -t 0 -f')
+        if restart == True:
+          os.system('shutdown -t 0 -f -r')
 
         if isLocked != None: 
           setKeyboardBlock(isLocked)
