@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
 import useToken from 'composables/useToken';
 import useToast from 'composables/useToast';
+import useFeedback from 'composables/useFeedback';
 import { changePassword } from 'utils/login';
+
+import ConfirmationModal from './ConfirmationModal.vue';
 
 const isValid = defineModel<boolean>({ default: false });
 const show = defineModel<boolean>('show', { default: true });
@@ -11,30 +14,43 @@ const props = defineProps<{ newPassword?: boolean }>();
 
 const token = useToken();
 const { show: showToast } = useToast();
-const password = ref<string | null>(null);
-const passwordConfirmation = ref<string | null>(null);
+
+const confirmationModal = ref<InstanceType<typeof ConfirmationModal>>();
+
+const feedback = useFeedback<{ password: string | null; passwordConfirmation: string | null }>(
+  {
+    password: null,
+    passwordConfirmation: null,
+  },
+  ({ password, passwordConfirmation }) => {
+    return {
+      password: password !== null && password.length >= 3,
+      passwordConfirmation: props.newPassword
+        ? password !== null && passwordConfirmation !== null && passwordConfirmation === password
+        : true,
+    };
+  }
+);
 
 async function onPasswordSubmit() {
   try {
-    if (props.newPassword && token.exists()) {
-      if (password.value === passwordConfirmation.value) {
-        await changePassword(password.value, token.currentToken);
+    if (feedback.allValid) {
+      if (props.newPassword && token.exists()) {
+        await confirmationModal.value.show({ title: 'Zmienić hasło?' });
+        await changePassword(feedback.v.password, token.currentToken);
         showToast('Changed password', { variant: 'success' });
         token.logout();
       } else {
-        throw { message: "Passwords don't match" };
+        token.setPassword(feedback.v.password);
+        await check();
       }
-    } else {
-      token.setPassword(password.value);
-      await check();
+      show.value = false;
     }
-    show.value = false;
   } catch (error) {
     show.value = true;
-    showToast(error.message, { variant: 'danger' });
+    showToast(error.message ?? 'Error', { variant: 'danger' });
   } finally {
-    password.value = null;
-    passwordConfirmation.value = null;
+    await feedback.reset();
   }
 }
 async function check() {
@@ -59,16 +75,33 @@ async function check() {
     cancel-title="Anuluj"
     :title="`${props.newPassword ? 'Zmiana hasła' : 'Logowanie'} administratora`"
     centered
+    @close="feedback.reset"
     @ok="onPasswordSubmit">
-    <BForm @submit="onPasswordSubmit">
-      <BFormText for="password-input">Podaj {{ props.newPassword ? 'nowe ' : '' }}hasło:</BFormText>
-      <BFormInput id="password-input" v-model="password" type="password"></BFormInput>
-      <BFormText for="confirmation-password-input" v-if="props.newPassword">Powtórz hasło:</BFormText>
-      <BFormInput
-        id="confirmation-password-input"
-        v-if="props.newPassword"
-        v-model="passwordConfirmation"
-        type="password"></BFormInput>
+    <BForm @submit="onPasswordSubmit" class="d-flex flex-column gap-1">
+      <BFormGroup>
+        <BFormText for="password-input">Podaj {{ props.newPassword ? 'nowe ' : '' }}hasło:</BFormText>
+        <BFormInput
+          id="password-input"
+          v-model="feedback.v.password"
+          :state="feedback.isValid.value.password"
+          @blur="() => feedback.onTouched('password')"
+          type="password"
+          aria-describedby="password-feedback" />
+        <BFormInvalidFeedback id="password-feedback"> Hasło musi mieć więcej niż 2 znaki </BFormInvalidFeedback>
+      </BFormGroup>
+      <BFormGroup>
+        <BFormText for="confirmation-password-input" v-if="props.newPassword">Powtórz hasło:</BFormText>
+        <BFormInput
+          id="confirmation-password-input"
+          v-if="props.newPassword"
+          v-model="feedback.v.passwordConfirmation"
+          :state="feedback.isValid.value.passwordConfirmation"
+          @blur="() => feedback.onTouched('passwordConfirmation')"
+          type="password"
+          aria-describedby="password-confirmation-feedback" />
+        <BFormInvalidFeedback id="password-confirmation-feedback"> Hasła nie są takie same </BFormInvalidFeedback>
+      </BFormGroup>
     </BForm>
+    <ConfirmationModal ref="confirmationModal" />
   </BModal>
 </template>
