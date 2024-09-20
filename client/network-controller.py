@@ -125,7 +125,7 @@ def get():
 
           window.setState(isLocked)
           if not isLocked:
-            print(remainingSeconds)
+            print('OFFLINE' if connectionError else 'ONLINE',  remainingSeconds)
         else:
           raise Exception(f"MAC address '{addresses[0]}' not registered")
       else:
