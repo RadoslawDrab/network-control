@@ -1,6 +1,15 @@
 <script setup lang="ts">
-export type Options = { title: string; text?: string; cancel: string; ok: string; default?: 'ok' | 'cancel' };
+export type Options = {
+  title: string;
+  text?: string;
+  cancel: string;
+  ok: string;
+  default?: 'ok' | 'cancel';
+  okVariant?: keyof BaseButtonVariant;
+  cancelVariant?: keyof BaseButtonVariant;
+};
 
+import { BaseButtonVariant } from 'bootstrap-vue-next';
 import { ref } from 'vue';
 
 const defaultOptions: Options = {
@@ -8,6 +17,8 @@ const defaultOptions: Options = {
   cancel: 'Nie',
   ok: 'Tak',
   default: 'cancel',
+  cancelVariant: 'outline-secondary',
+  okVariant: 'outline-danger',
 };
 const show = defineModel<boolean>({ default: false });
 const options = ref<Options>(defaultOptions);
@@ -23,8 +34,14 @@ async function setShow(opt: Partial<Options> = {}) {
   };
 
   return new Promise<void>((resolve, reject) => {
-    accept.value = resolve;
-    cancel.value = reject;
+    accept.value = () => {
+      show.value = false;
+      resolve();
+    };
+    cancel.value = () => {
+      show.value = false;
+      reject();
+    };
   });
 }
 
@@ -34,24 +51,28 @@ defineExpose({ isShown: show, show: setShow, defaultOptions });
   <BModal
     v-model="show"
     centered
-    cancel-variant="outline-secondary"
-    ok-variant="outline-danger"
-    :title="options.title"
-    :ok-title="options.ok"
-    :cancel-title="options.cancel"
-    size="sm"
+    size="md"
     header-class="px-3 py-2"
     body-class="p-3"
     footer-class="p-1"
     :autofocus-button="options.default"
-    :hide-header="!options.text"
-    @ok="accept"
-    @cancel="cancel">
+    :hide-header="!options.text">
+    <template #title>
+      <h5 class="m-0" v-html="options.title"></h5>
+    </template>
+    <template #ok>
+      <BButton @click="accept" :variant="options.okVariant">
+        <span v-html="options.ok"></span>
+      </BButton>
+    </template>
+    <template #cancel>
+      <BButton @click="cancel" :variant="options.cancelVariant">
+        <span v-html="options.cancel"></span>
+      </BButton>
+    </template>
     <h5 v-if="!options.text" class="m-0">
       {{ options.title }}
     </h5>
-    <span v-else>
-      {{ options.text }}
-    </span>
+    <span v-else v-html="options.text"> </span>
   </BModal>
 </template>
