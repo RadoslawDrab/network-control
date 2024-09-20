@@ -6,6 +6,7 @@ import useToast from 'composables/useToast';
 import useFeedback from 'composables/useFeedback';
 
 import DeviceGrid from './DeviceGrid.vue';
+import ConfirmationModal from './ConfirmationModal.vue';
 
 export type CellSettings = { name: string; shortName?: string; address: string; position: [number, number] };
 
@@ -22,6 +23,7 @@ const emit = defineEmits<{ submit: [settings: CellSettings] }>();
 
 const toast = useToast();
 const deviceGrid = ref<InstanceType<typeof DeviceGrid>>();
+const confirmationModal = ref<InstanceType<typeof ConfirmationModal>>();
 
 const settings = useFeedback<CellSettings>(
   props.defaultSettings,
@@ -48,12 +50,20 @@ const enabledAddresses = computed(() => {
 
 async function onSubmit(event: SubmitEvent) {
   if (settings.allValid.value) {
-    emit('submit', settings.v as CellSettings);
-
-    show.value = false;
-    const form = event.target as HTMLFormElement;
-    form.reset();
-    if (!props.edit && props.defaultSettings) await settings.reset();
+    try {
+      await confirmationModal.value.show({
+        title: props.edit ? 'Potwierdź edycję urządzenia' : 'Potwierdź dodanie urządzenia',
+        okVariant: 'outline-success',
+        cancelVariant: 'outline-danger',
+      });
+      emit('submit', settings.v as CellSettings);
+      const form = event.target as HTMLFormElement;
+      form.reset();
+      show.value = false;
+      if (!props.edit && props.defaultSettings) await settings.reset();
+    } catch (error) {
+      toast.show('Anulowano', { variant: 'info' });
+    }
   } else {
     toast.show('Error', { variant: 'danger', body: 'Not enough data' });
   }
@@ -143,6 +153,7 @@ watch(
       <BButton class="mt-3" type="submit" variant="primary">{{ props.edit ? 'Zaktualizuj' : 'Dodaj' }}</BButton>
     </BForm>
   </BOffcanvas>
+  <ConfirmationModal ref="confirmationModal" />
 </template>
 <style scoped lang="scss">
 .form {
