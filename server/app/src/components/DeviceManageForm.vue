@@ -17,6 +17,7 @@ import { promise } from 'utils/server';
 
 import { Device } from 'types/index';
 import DeviceGrid from './DeviceGrid.vue';
+import ConfirmationModal from './ConfirmationModal.vue';
 
 const device = defineModel<Device | null>({ default: null });
 const props = withDefaults(
@@ -49,8 +50,8 @@ const macAddress = computed(() =>
 const isOnline = computed(() =>
   device.value ? props.currentOnline.some((address) => device.value.address === address) : false
 );
-const deleteDeviceModal = ref<boolean>(false);
 const editDeviceForm = ref<boolean>(false);
+const confirmationModal = ref<InstanceType<typeof ConfirmationModal>>();
 const token = useToken();
 const toast = useToast();
 
@@ -87,16 +88,23 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
 }
 async function set(type: 'restart' | 'shutdown' | 'time') {
   let note: string;
-  switch (type) {
-    case 'restart':
-      note = 'Rozpoczęto restart urządzenia';
-      break;
-    case 'shutdown':
-      note = 'Rozpoczęto wyłączenie urządzenia';
-      break;
-    case 'time':
-      note = 'Pokazano czas na urządzeniu';
-      break;
+  const options = confirmationModal.value.defaultOptions;
+  try {
+    switch (type) {
+      case 'restart':
+        note = 'Rozpoczęto restart urządzenia';
+        options.title = 'Rozpocząć restart?';
+      case 'shutdown':
+        note = 'Rozpoczęto wyłączenie urządzenia';
+        options.title = 'Rozpocząć wyłączenie?';
+      case 'time':
+        note = 'Pokazano czas na urządzeniu';
+        options.title = 'Pokazać czas?';
+    }
+    await confirmationModal.value.show(options);
+  } catch (error) {
+    toast.show('Anulowano', { variant: 'info' });
+    return;
   }
   try {
     if (!device.value.address) throw { message: 'No MAC address provided' };
@@ -112,6 +120,17 @@ async function set(type: 'restart' | 'shutdown' | 'time') {
   }
 }
 async function deleteDevice() {
+  try {
+    await confirmationModal.value.show({
+      title: 'Potwierdzenie',
+      text: `Usunąć <b>${device.value.name}</b>${
+        device.value.shortName ? ` (${device.value.shortName})` : ''
+      } <small class="text-secondary">${macAddress.value}</small>`,
+    });
+  } catch (error) {
+    toast.show('Anulowano', { variant: 'info' });
+    return;
+  }
   try {
     if (!device.value.address) throw { message: 'No MAC address provided' };
 
@@ -163,12 +182,7 @@ async function updateDevice(settings: Device) {
           </footer>
         </div>
         <div class="vertical align-self-start" v-if="token.isLoggedIn">
-          <BButton
-            @click="() => (deleteDeviceModal = true)"
-            class="p-0"
-            variant="outline-danger"
-            tooltip
-            aria-label="Usuń urządzenie">
+          <BButton @click="deleteDevice" class="p-0" variant="outline-danger" tooltip aria-label="Usuń urządzenie">
             <PhX class="m-1" weight="bold" size="1.25rem" />
           </BButton>
           <BButton
@@ -216,7 +230,7 @@ async function updateDevice(settings: Device) {
           </BButton>
         </div>
         <aside>
-          <BButton @click="() => set('time')" variant="outline-primary" class="button">
+          <BButton @click="() => set('time')" variant="outline-primary" class="button" :disabled="!isOnline">
             <PhAlarm class="icon" />
             Pokaż czas
           </BButton>
@@ -232,23 +246,9 @@ async function updateDevice(settings: Device) {
             <PhArrowCounterClockwise class="icon" />
             Uruchom ponownie
           </BButton>
+          <ConfirmationModal ref="confirmationModal" />
         </aside>
       </div>
-      <BModal
-        v-model="deleteDeviceModal"
-        hide-header
-        centered
-        ok-variant="danger"
-        ok-title="Usuń"
-        cancel-title="Anuluj"
-        @ok="deleteDevice">
-        Usunąć urządzenie
-        <span class="fw-bold">
-          {{ device.name }}
-          <span v-if="device.shortName">({{ device.shortName }})</span>
-        </span>
-        <small class="text-secondary"> ({{ macAddress }})</small>
-      </BModal>
       <DeviceFormOffcanvas v-model="editDeviceForm" :default-settings="device" edit @submit="updateDevice" />
     </BForm>
     <div v-else>Nie wybrano urządzenia</div>
