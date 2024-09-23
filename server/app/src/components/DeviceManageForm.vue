@@ -94,12 +94,15 @@ async function set(type: 'restart' | 'shutdown' | 'time') {
       case 'restart':
         note = 'Rozpoczęto restart urządzenia';
         options.title = 'Rozpocząć restart?';
+        break;
       case 'shutdown':
         note = 'Rozpoczęto wyłączenie urządzenia';
         options.title = 'Rozpocząć wyłączenie?';
+        break;
       case 'time':
         note = 'Pokazano czas na urządzeniu';
         options.title = 'Pokazać czas?';
+        break;
     }
     await confirmationModal.value.show(options);
   } catch (error) {
