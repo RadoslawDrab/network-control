@@ -5,6 +5,7 @@ import useToken from 'composables/useToken';
 import useToast from 'composables/useToast';
 import useFeedback from 'composables/useFeedback';
 import { changePassword } from 'utils/login';
+import { and } from 'utils/logic';
 
 import ConfirmationModal from './ConfirmationModal.vue';
 
@@ -23,8 +24,16 @@ const feedback = useFeedback<{ password: string | null; passwordConfirmation: st
     passwordConfirmation: null,
   },
   ({ password, passwordConfirmation }) => {
+    const lowercaseCharactersRegEx = /[a-z]*/g;
+    const uppercaseCharactersRegEx = /[A-Z]*/g;
+    const digitsRegEx = /[0-9]*/g;
+    const specialCharactersRegEx = /[,.?:;!@#$%^&*(){}[\]-_\\|+=~`]*/g;
+
     return {
-      password: password !== null && password.length >= 3,
+      password:
+        password !== null &&
+        password.length >= 8 &&
+        and(password, lowercaseCharactersRegEx, uppercaseCharactersRegEx, digitsRegEx, specialCharactersRegEx),
       passwordConfirmation: props.newPassword
         ? password !== null && passwordConfirmation !== null && passwordConfirmation === password
         : true,
@@ -87,7 +96,9 @@ async function check() {
           @blur="() => feedback.onTouched('password')"
           type="password"
           aria-describedby="password-feedback" />
-        <BFormInvalidFeedback id="password-feedback"> Hasło musi mieć więcej niż 2 znaki </BFormInvalidFeedback>
+        <BFormInvalidFeedback id="password-feedback">
+          Hasło musi zawierać małe i duże litery, liczby, znaki specjalne oraz musi mieć więcej niż 7 znaków
+        </BFormInvalidFeedback>
       </BFormGroup>
       <BFormGroup>
         <BFormText for="confirmation-password-input" v-if="props.newPassword">Powtórz hasło:</BFormText>
