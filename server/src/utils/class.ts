@@ -11,14 +11,16 @@ export class Config<T extends ConfigType> {
   restartRequired: boolean;
   private fileName: string;
   path: string;
+  private dir: string;
   private key: string;
   private defaultData: MaybePartial<T>;
   constructor(fileName: string, data: MaybePartial<T>, key: string) {
     const isProduction = process.env.NODE_ENV === 'production';
 
-    this.name = fileName.replace('.conf', '');
+    this.name = fileName.replace(/\..*$/, '');
     this.fileName = this.name + '.conf';
-    this.path = path.resolve((isProduction ? './' : './dist/') + this.fileName);
+    this.dir = path.resolve(isProduction ? './' : './node_modules/.temp');
+    this.path = path.resolve(this.dir, this.fileName);
     this.key = key;
     this.restartRequired = false;
 
@@ -68,6 +70,9 @@ export class Config<T extends ConfigType> {
     }
   }
   private writeFile(data: MaybePartial<T>, restartRequired: boolean = false) {
+    if (!fs.existsSync(this.dir)) {
+      fs.mkdirSync(this.dir, { recursive: true });
+    }
     fs.writeFile(
       this.path,
       this.encrypt(data),
