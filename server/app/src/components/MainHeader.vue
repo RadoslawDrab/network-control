@@ -1,7 +1,8 @@
 <script setup lang="ts" generic="T extends string">
 import { ref } from 'vue';
 import useToken from 'composables/useToken';
-import { PhNetwork, PhSignIn, PhSignOut } from '@phosphor-icons/vue';
+import { PhList, PhMoon, PhNetwork, PhSignIn, PhSignOut, PhSun } from '@phosphor-icons/vue';
+import { useColorMode } from 'bootstrap-vue-next';
 
 export type NavItem<Id = string> = {
   id: Id;
@@ -19,6 +20,8 @@ const props = withDefaults(
   { callback: () => {} }
 );
 
+const mode = useColorMode();
+
 const token = useToken();
 const showLoginModal = ref<boolean>(false);
 const isValidLogin = ref<boolean>(false);
@@ -31,6 +34,9 @@ function itemCallback(item: NavItem<T>) {
   }
   props.callback(item.id);
 }
+function changeColorMode() {
+  mode.value = mode.value === 'dark' ? 'light' : 'dark';
+}
 </script>
 <template>
   <header class="py-2 mb-3 d-flex align-items-center justify-content-between border-bottom border-secondary-subtle">
@@ -39,16 +45,30 @@ function itemCallback(item: NavItem<T>) {
       Network Controller
     </h1>
     <BNav pills class="nav">
-      <BNavItem
-        v-for="item in props.navItems.filter((item) => !item.passwordRequired || token.isLoggedIn)"
-        :key="item.id"
-        @click="() => itemCallback(item)"
-        link-class="d-flex gap-2 align-items-center">
-        <span v-if="item.html" v-html="item.html"></span>
-        <span v-else class="d-flex gap-2 align-items-center">
+      <BNavItemDropdown no-caret>
+        <template #button-content>
+          <PhList size="1.5rem" />
+        </template>
+        <MainHeaderActionGroup
+          :items="props.navItems.filter((item) => !item.passwordRequired)"
+          :callback="itemCallback"
+          :group-props="{ header: 'Główne' }"
+          v-slot="item">
           <slot :="item"></slot>
-          {{ item.text ?? item.id }}
-        </span>
+        </MainHeaderActionGroup>
+        <BDropdownDivider v-if="token.isLoggedIn" />
+        <MainHeaderActionGroup
+          v-if="token.isLoggedIn"
+          :items="props.navItems.filter((item) => item.passwordRequired && token.isLoggedIn)"
+          :callback="itemCallback"
+          :group-props="{ header: 'Administracja' }"
+          v-slot="item">
+          <slot :="item"></slot>
+        </MainHeaderActionGroup>
+      </BNavItemDropdown>
+      <BNavItem class="vertical-line" @click="changeColorMode">
+        <PhSun v-if="mode === 'light'" size="1.5rem" />
+        <PhMoon v-else size="1.5rem" />
       </BNavItem>
       <BNavItem class="vertical-line" link-class="link" v-if="!token.isLoggedIn" @click="() => (showLoginModal = true)">
         <div class="link">
@@ -70,11 +90,26 @@ function itemCallback(item: NavItem<T>) {
 .nav {
   --bs-nav-link-color: var(--bs-body-color);
   --bs-nav-link-hover-color: var(--bs-primary);
+  align-items: center;
   .link {
     display: flex;
     align-items: center;
     gap: 0.5em;
+    line-height: 1.2;
   }
+  // .nav-link {
+  //   // padding: 0;
+  //   --bs-nav-link-padding-x: 0rem !important;
+  //   --bs-nav-link-padding-y: 0rem !important;
+  //   // --bs-btn-padding-x: 0rem;
+  //   // --bs-btn-padding-y: 0rem;
+
+  //   display: flex;
+  //   align-items: center;
+  //   .icon {
+  //     margin: 0.25em;
+  //   }
+  // }
   .vertical-line {
     border-left: 1px solid var(--bs-secondary-bg);
   }
