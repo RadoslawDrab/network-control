@@ -11,6 +11,8 @@ declare module 'vue' {
     BButton: typeof import('bootstrap-vue-next')['BButton']
     BCol: typeof import('bootstrap-vue-next')['BCol']
     BContainer: typeof import('bootstrap-vue-next')['BContainer']
+    BDropdownDivider: typeof import('bootstrap-vue-next')['BDropdownDivider']
+    BDropdownItemButton: typeof import('bootstrap-vue-next')['BDropdownItemButton']
     BForm: typeof import('bootstrap-vue-next')['BForm']
     BFormGroup: typeof import('bootstrap-vue-next')['BFormGroup']
     BFormInput: typeof import('bootstrap-vue-next')['BFormInput']
@@ -20,6 +22,7 @@ declare module 'vue' {
     BModal: typeof import('bootstrap-vue-next')['BModal']
     BNav: typeof import('bootstrap-vue-next')['BNav']
     BNavItem: typeof import('bootstrap-vue-next')['BNavItem']
+    BNavItemDropdown: typeof import('bootstrap-vue-next')['BNavItemDropdown']
     BOffcanvas: typeof import('bootstrap-vue-next')['BOffcanvas']
     BRow: typeof import('bootstrap-vue-next')['BRow']
     BToastOrchestrator: typeof import('bootstrap-vue-next')['BToastOrchestrator']
@@ -28,6 +31,7 @@ declare module 'vue' {
     DeviceGrid: typeof import('./src/components/DeviceGrid.vue')['default']
     DeviceManageForm: typeof import('./src/components/DeviceManageForm.vue')['default']
     MainHeader: typeof import('./src/components/MainHeader.vue')['default']
+    MainHeaderActionGroup: typeof import('./src/components/MainHeaderActionGroup.vue')['default']
     PasswordModal: typeof import('./src/components/PasswordModal.vue')['default']
   }
 }
