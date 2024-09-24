@@ -1,6 +1,6 @@
 <script setup lang="tsx">
 import { reactive, ref } from 'vue';
-import { PhAlarm, PhDesktop, PhPassword } from '@phosphor-icons/vue';
+import { PhAlarm, PhArrowCounterClockwise, PhDesktop, PhPassword } from '@phosphor-icons/vue';
 
 import { promise } from 'utils/server';
 import usePromiseAuth from 'composables/usePromiseAuth';
@@ -23,7 +23,7 @@ const show = reactive<{
   showTimeInfo: false,
 });
 
-const navItems = ref<NavItem<keyof typeof show>[]>([
+const navItems = ref<NavItem<keyof typeof show | 'refreshInfo'>[]>([
   {
     id: 'addDeviceForm',
     text: 'Dodaj komputer',
@@ -31,6 +31,7 @@ const navItems = ref<NavItem<keyof typeof show>[]>([
   },
   { id: 'changePasswordModal', text: 'Zmień hasło', passwordRequired: true },
   { id: 'showTimeInfo', text: 'Pokaż czas', callback: showTimeInfo },
+  { id: 'refreshInfo', text: 'Odśwież', callback: refreshInfo },
   // { id: 'adminForm', html: 'Ustawienia administracyjne', passwordRequired: true },
 ]);
 const selectedDevice = ref<Device | null>(null);
@@ -86,6 +87,14 @@ async function showTimeInfo() {
     toast.show('Błąd', { variant: 'danger', body: error.message });
   }
 }
+async function refreshInfo() {
+  try {
+    await deviceGrid.value.auth.get();
+    toast.show('Odświeżono', { variant: 'info' });
+  } catch (error) {
+    toast.show('Błąd', { variant: 'danger', body: error.message });
+  }
+}
 </script>
 <template>
   <BContainer class="d-flex flex-column gap-2">
@@ -93,6 +102,7 @@ async function showTimeInfo() {
       <PhAlarm v-if="item.id === 'showTimeInfo'" class="icon" />
       <PhDesktop v-if="item.id === 'addDeviceForm'" class="icon" />
       <PhPassword v-if="item.id === 'changePasswordModal'" class="icon" />
+      <PhArrowCounterClockwise v-if="item.id === 'refreshInfo'" class="icon" />
     </MainHeader>
     <BRow gutter-y="3" align-v="start">
       <BCol cols="auto" class="d-flex justify-content-center">
