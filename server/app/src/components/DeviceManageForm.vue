@@ -82,6 +82,7 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
     );
     device.value = await promise<Device>(`/device/${device.value.address}`);
     toast.show(`${note} czas`, { variant: 'info' });
+    await auth.get();
   } catch (error) {
     toast.show('Błąd', { variant: 'danger', body: error.message });
   }
@@ -106,7 +107,6 @@ async function set(type: 'restart' | 'shutdown' | 'time') {
     }
     await confirmationModal.value.show(options);
   } catch (error) {
-    toast.show('Anulowano', { variant: 'info' });
     return;
   }
   try {
@@ -118,6 +118,7 @@ async function set(type: 'restart' | 'shutdown' | 'time') {
       { method: 'POST', body: JSON.stringify({ [type]: true }) }
     );
     toast.show(note, { variant: 'info' });
+    await auth.get();
   } catch (error) {
     toast.show('Błąd', { variant: 'danger', body: error.message });
   }
@@ -131,7 +132,6 @@ async function deleteDevice() {
       } <small class="text-secondary">${macAddress.value}</small>`,
     });
   } catch (error) {
-    toast.show('Anulowano', { variant: 'info' });
     return;
   }
   try {
@@ -141,6 +141,7 @@ async function deleteDevice() {
     toast.show('Deleted device', { variant: 'success' });
     emit('delete', device.value);
     device.value = null;
+    await auth.get();
   } catch (error) {
     toast.show('Error', { variant: 'danger', body: error.message });
   }
@@ -153,6 +154,7 @@ async function updateDevice(settings: Device) {
     const differentPosition =
       device.value.position[0] !== settings.position[0] || device.value.position[1] !== settings.position[1];
     device.value = differentPosition ? null : settings;
+    await auth.get();
   } catch (error) {
     toast.show('Error', { variant: 'danger', body: error.message });
   }
