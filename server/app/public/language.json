@@ -1,0 +1,37 @@
+{
+  "template": "##TEMPLATE##",
+  "fallbackText": "NOT_FOUND",
+  "attributeName": "translate",
+  "attributes": ["aria-label"],
+  "languages": ["en", "pl"],
+
+  "labels": {
+    "ok": ["OK", "OK"],
+    "cancel": ["Cancel", "Anuluj"],
+    "language": ["Language", "Język"],
+    "online": ["Online", "Włączone"],
+    "offline": ["Offline", "Wyłączone"],
+    "shutdown": ["Shutdown", "Wyłącz"],
+    "restart": ["Restart", "Uruchom ponownie"],
+    "refresh": ["Refresh", "Odśwież"],
+    "login": ["Log in", "Zaloguj się"],
+    "logout": ["Log out", "Wyloguj się"],
+    "mode.dark": ["Dark mode", "Tryb ciemny"],
+    "mode.light": ["Light mode", "Tryb jasny"],
+    "options.main": ["Main", "Główne"],
+    "options.administration": ["Administration", "Administracja"],
+    "password.change": ["Change password", "Zmień hasło"],
+    "password.enter": ["Enter password:", "Podaj hasło:"],
+    "password.new-enter": ["Enter new password:", "Podaj nowe hasło:"],
+    "password.new-enter-repeat": ["Enter new password again:", "Podaj ponownie nowe hasło:"],
+    "time": ["time", "czas"],
+    "time.reset": ["Reset time", "Resetuj czas"],
+    "time.change": ["Change time", "Zmień czas"],
+    "time.add": ["Add time", "Dodaj czas"],
+    "time.remove": ["Remove time", "Usuń czas"],
+    "time.show": ["Show time", "Pokaż czas"],
+    "device.shutdown": ["Shutdown device", "Wyłącz urządzenie"],
+    "device.restart": ["Restart device", "Uruchom ponownie urządzenie"],
+    "device.add": ["Add device", "Dodaj urządzenie"]
+  }
+}
