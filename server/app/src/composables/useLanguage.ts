@@ -2,18 +2,22 @@ import { computed, onMounted, ref, watch } from 'vue';
 
 import languageFile from 'public/language.json';
 
-const useLanguage = <Id extends string = string>() => {
+const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => {
   const storageKey = `${document.location.origin}/language`;
-  const options = ref<TranslationOptions<Id>>({
+  const options = ref<Required<TranslationOptions<Id>>>({
     languages: ['en', 'pl'],
     template: '##TEMPLATE##',
     fallbackText: 'NOT_FOUND',
     attributeName: 'translate',
     attributes: ['aria-label'],
+    labels: null,
     ...(languageFile as Partial<TranslationOptions<Id>>),
   });
+  type TemplateId = TranslateTemplate<Id>;
+
   const language = ref<Language>((sessionStorage.getItem(storageKey) as Language) ?? getBrowserLanguage());
-  const attributeName = computed(() => options.value.attributeName ?? 'translate');
+
+  const attributeName = computed(() => options.value.attributeName);
   const languageIndex = computed(() => options.value.languages.findIndex((l) => language.value === l));
   const template = computed(() => {
     const opt = {
@@ -171,14 +175,42 @@ const useLanguage = <Id extends string = string>() => {
 };
 export default useLanguage;
 
-type Language = 'en' | 'pl';
-type TranslateTemplate = `${string}TEMPLATE${string}`;
+export type Language = 'en' | 'pl';
+type TranslateTemplate<T extends string = 'TEMPLATE'> = `${string}${T}${string}`;
 
-interface TranslationOptions<Id extends string> {
+interface TranslationOptions<Id extends string = string> {
+  /** Languages in order in which they are added in `language.json` */
   languages: Language[];
+  /** Template for string text. Must include `TEMPLATE` keyword
+   * @default "##TEMPLATE##"
+   */
   template: TranslateTemplate;
+  /** Fallback text when no translation is found and there is no initial text
+   * @default "NOT_FOUND"
+   */
   fallbackText: string;
-  labels?: Record<Id, string[]>;
+  /**
+   * Labels with translations. Each label has to be in order which is specified in `languages` property
+   * @example
+   * ```
+   * languages: ['en', 'pl']
+   * labels: {
+   *   time: ["Time", "Czas"]
+   * }
+   * Where `time` is id
+   * ```
+   */
+  labels: Record<Id, string[]> | null;
+  /** Attribute to search for.
+   * @default translate
+   */
   attributeName?: string;
+  /** Attributes which will be checked.
+   * @example
+   * ```
+   * attributes: ["aria-label"]
+   * ```
+   * Will check any aria-label attribute
+   */
   attributes: string[];
 }
