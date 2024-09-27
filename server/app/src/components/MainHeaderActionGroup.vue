@@ -1,11 +1,11 @@
-<script setup lang="ts" generic="T extends string">
+<script setup lang="ts" generic="Id extends string, T = any">
 import { BDropdownGroup } from 'bootstrap-vue-next';
 
 import { NavItem } from './MainHeader.vue';
 
 const props = defineProps<{
-  items: NavItem<T>[];
-  callback: (item: NavItem<T>) => void;
+  items: NavItem<Id, T>[];
+  callback: (item: NavItem<Id, T>) => void;
   groupProps?: InstanceType<typeof BDropdownGroup>['$props'];
 }>();
 </script>
@@ -15,11 +15,14 @@ const props = defineProps<{
       v-for="item in props.items"
       :key="item.id"
       @click="() => props.callback(item)"
+      :active="item.active"
       link-class="d-flex gap-2 align-items-center">
       <span v-if="item.html" v-html="item.html"></span>
       <span v-else class="d-flex gap-2 align-items-center">
         <slot :="item"></slot>
-        {{ item.text ?? item.id }}
+        <span :data-translate="item.text ?? item.id">
+          {{ item.text ?? item.id }}
+        </span>
       </span>
     </BDropdownItemButton>
   </BDropdownGroup>
