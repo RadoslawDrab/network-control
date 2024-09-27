@@ -13,9 +13,9 @@ import { BaseButtonVariant } from 'bootstrap-vue-next';
 import { ref } from 'vue';
 
 const defaultOptions: Options = {
-  title: 'Potwierdzenie',
-  cancel: 'Nie',
-  ok: 'Tak',
+  title: '##confirmation##',
+  cancel: '##no##',
+  ok: '##yes##',
   default: 'cancel',
   cancelVariant: 'outline-secondary',
   okVariant: 'outline-danger',
