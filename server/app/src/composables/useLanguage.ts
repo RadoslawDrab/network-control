@@ -81,7 +81,8 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
         return nodes.filter((n) => (nodeType ? n.nodeType === nodeType : true));
       }
       function translateElements(...elements: HTMLElement[]) {
-        const filteredDataset = elements.filter((el) => {
+        // All elements which include translation data attribute or custom attribute
+        const filteredElements = elements.filter((el) => {
           if (el.dataset || el.querySelector) {
             return (
               el.dataset[attributeName.value] ||
@@ -91,20 +92,27 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
           }
           return false;
         });
-        for (let el of filteredDataset) {
+
+        for (let el of filteredElements) {
+          // Translates current element
           if (el.dataset[attributeName.value]) {
-            translate(el);
+            translateElement(el);
           }
+
           const childElements = el.querySelectorAll<HTMLElement>(`[data-${attributeName.value}]`);
 
-          childElements.forEach((el) => translate(el));
+          // Translates all child elements
+          childElements.forEach((el) => translateElement(el));
 
           options.value.attributes.forEach((attr) => {
             const attribute = `${attr}-${attributeName.value}`;
-            const attributeElements = el.querySelectorAll<HTMLElement>(`[${attribute}]`);
+            const attributeElements = [...el.querySelectorAll<HTMLElement>(`[${attribute}]`)];
 
+            if (el.getAttribute(attribute)) attributeElements.push(el);
+
+            // Translates all custom in childs attributes
             attributeElements.forEach((el) => {
-              translate(el, {
+              translateElement(el, {
                 name: attr,
                 value: el.getAttribute(attribute),
               });
@@ -113,21 +121,24 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
         }
       }
     }
-    function translate(el: HTMLElement, attribute?: { name: string; value: string }) {
-      const ids = attribute ? getTemplateIds(attribute.value, false) : [el.dataset.translate];
+    function translateElement(el: HTMLElement, attribute?: { name: string; value: string }) {
+      // Gets element ids
+      const ids: (Id | TemplateId)[] = attribute ? getTemplateIds(attribute.value) : [el.dataset.translate as Id];
 
       for (const id of ids) {
-        const item: string[] | null = options.value.labels[getTemplateIds(id, true)[0]] ?? null;
+        // Gets translations
+        const value = translate(id);
 
-        if (item && item[languageIndex.value]) {
-          const value = item[languageIndex.value];
-
+        if (value) {
+          // Sets attribute
           if (attribute) el.setAttribute(attribute.name, attribute.value.replace(id, value));
+          // Sets text content
           else el.textContent = value;
 
           return;
         }
 
+        // Replaces text content if no translation is found
         if (el.textContent === '' || el.textContent.match(template.value.checkRegEx)) {
           el.textContent = options.value.fallbackText;
         }
@@ -142,11 +153,14 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
   function isCurrentLanguage(lang: Language) {
     return language.value === lang;
   }
-  function translate(id: Id): string | null {
+  function translate(id: Id | TemplateId): string | null {
     if (options.value.labels) {
+      // Gets translation values based on `id`
       // @ts-ignore
-      const values: string[] | null = options.value.labels[id];
+      const values: string[] | null =
+        options.value.labels[id.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '')];
       if (values && values.length > 0) {
+        // Returns translation
         return values[languageIndex.value];
       }
     }
@@ -164,12 +178,13 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
       str
     );
   }
-  function getTemplateIds(str: string, replace: boolean = false): string[] {
-    const templateMatch = str.match(template.value.checkRegEx) ?? [str];
-
-    return templateMatch.map((id) =>
-      replace ? id.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '') : id
+  function getIds(str: string): Id[] {
+    return getTemplateIds(str).map(
+      (id) => id.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '') as Id
     );
+  }
+  function getTemplateIds(str: string): TemplateId[] {
+    return (str.match(template.value.checkRegEx) ?? []) as TemplateId[];
   }
   return { translate, setLanguage, languages: options.value.languages, isCurrentLanguage, language };
 };
