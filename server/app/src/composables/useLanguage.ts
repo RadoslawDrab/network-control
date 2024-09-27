@@ -66,7 +66,7 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
         const textNodes = getNodes(target, Node.TEXT_NODE)
           .filter((n) => n.textContent && n.textContent.match(template.value.checkRegEx))
           .map((el) => {
-            el.parentElement.dataset[attributeName.value] = getTemplateId(el.textContent);
+            el.parentElement.dataset[attributeName.value] = el.textContent;
             return el.parentElement;
           });
         translateElements(...getNodes(target), ...textNodes);
@@ -122,16 +122,21 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
       }
     }
     function translateElement(el: HTMLElement, attribute?: { name: string; value: string }) {
-      // Gets element ids
-      const ids: (Id | TemplateId)[] = attribute ? getTemplateIds(attribute.value) : [el.dataset.translate as Id];
+      const isId = !attribute && Object.keys(options.value.labels).includes(el.dataset.translate);
 
-      for (const id of ids) {
-        // Gets translations
-        const value = translate(id);
+      if (isId) {
+        t(el.dataset.translate);
+        return;
+      }
+
+      t(attribute ? attribute.value : el.dataset.translate);
+
+      function t(text: string) {
+        const value = isId ? translate(text as Id) : translateText(text);
 
         if (value) {
           // Sets attribute
-          if (attribute) el.setAttribute(attribute.name, attribute.value.replace(id, value));
+          if (attribute) el.setAttribute(attribute.name, attribute.value.replace(text, value));
           // Sets text content
           else el.textContent = value;
 
@@ -155,10 +160,13 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
   }
   function translate(id: Id | TemplateId): string | null {
     if (options.value.labels) {
+      const templateIds = getTemplateIds(id);
+      const newId = templateIds.length > 0 ? templateIds[0] : id;
+
       // Gets translation values based on `id`
       // @ts-ignore
       const values: string[] | null =
-        options.value.labels[id.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '')];
+        options.value.labels[newId.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '')];
       if (values && values.length > 0) {
         // Returns translation
         return values[languageIndex.value];
@@ -166,22 +174,19 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
     }
     return null;
   }
+  function translateText(text: string): string {
+    if (options.value.labels) {
+      const templateIds = getTemplateIds(text);
+
+      if (templateIds.length === 0) {
+        return translate(text as Id);
+      }
+      return templateIds.reduce((value, id) => value.replace(id, translate(id)), text);
+    }
+    return text;
+  }
   function setLanguage(lang: Language) {
     language.value = lang;
-  }
-  function getTemplateId(str: string) {
-    const templateMatch = str.match(template.value.checkRegEx) ?? [str];
-
-    return templateMatch.reduce(
-      (newStr, s) =>
-        newStr.replace(s, s.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '')),
-      str
-    );
-  }
-  function getIds(str: string): Id[] {
-    return getTemplateIds(str).map(
-      (id) => id.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '') as Id
-    );
   }
   function getTemplateIds(str: string): TemplateId[] {
     return (str.match(template.value.checkRegEx) ?? []) as TemplateId[];
