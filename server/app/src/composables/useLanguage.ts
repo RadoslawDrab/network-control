@@ -132,7 +132,7 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
       t(attribute ? attribute.value : el.dataset.translate);
 
       function t(text: string) {
-        const value = isId ? translate(text as Id) : translateText(text);
+        const value: string | null = isId ? translate(text as Id) : translateText(text);
 
         if (value) {
           // Sets attribute
@@ -169,7 +169,7 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
         options.value.labels[newId.replace(template.value.prefixRegEx, '').replace(template.value.suffixRegEx, '')];
       if (values && values.length > 0) {
         // Returns translation
-        return values[languageIndex.value];
+        return values[languageIndex.value] ?? null;
       }
     }
     return null;
@@ -179,9 +179,9 @@ const useLanguage = <Id extends string = keyof typeof languageFile.labels>() => 
       const templateIds = getTemplateIds(text);
 
       if (templateIds.length === 0) {
-        return translate(text as Id);
+        return translate(text as Id) ?? options.value.fallbackText;
       }
-      return templateIds.reduce((value, id) => value.replace(id, translate(id)), text);
+      return templateIds.reduce((value, id) => value.replace(id, translate(id) ?? options.value.fallbackText), text);
     }
     return text;
   }
