@@ -180,7 +180,7 @@ async function updateDevice(settings: Device) {
               <span class="fs-6 text-body text-body-tertiary">{{ macAddress }}</span>
             </div>
             <span class="fs-6 text-body text-body-tertiary">
-              ##device.unlocked-to##:
+              <span> ##device.unlocked-to##: </span>
               {{ new Date(device.lockAfter).toLocaleTimeString([], { timeStyle: 'short' }) }}
               ({{ new Date(device.lockAfter).toLocaleDateString([]) }})
             </span>
