@@ -52,7 +52,7 @@ async function onSubmit(event: SubmitEvent) {
   if (settings.allValid.value) {
     try {
       await confirmationModal.value.show({
-        title: props.edit ? 'Potwierdź edycję urządzenia' : 'Potwierdź dodanie urządzenia',
+        title: props.edit ? '##device.confirmation.edit##' : '##device.confirmation.add##',
         okVariant: 'outline-success',
         cancelVariant: 'outline-danger',
       });
@@ -62,10 +62,10 @@ async function onSubmit(event: SubmitEvent) {
       show.value = false;
       if (!props.edit && props.defaultSettings) await settings.reset();
     } catch (error) {
-      toast.show('Anulowano', { variant: 'info' });
+      toast.show('##canceled##', { variant: 'info' });
     }
   } else {
-    toast.show('Error', { variant: 'danger', body: 'Not enough data' });
+    toast.show('##error##', { variant: 'danger', body: '##error.not-enough-data##' });
   }
 }
 
@@ -83,23 +83,25 @@ watch(
     placement="end"
     width="50%"
     header-class="border-bottom"
-    :title="`${props.edit ? 'Edytuj' : 'Dodaj'} komputer`">
+    :title="props.edit ? '##device.edit##' : '##device.add##'">
     <BForm class="form" @submit="onSubmit">
       <BFormGroup>
-        <BFormText for="device-name">Nazwa</BFormText>
+        <BFormText for="device-name" data-translate="name">Name</BFormText>
         <BFormInput
           id="device-name"
           v-model.trim="settings.v.name"
           type="text"
           required
           aria-describedby="device-name-feedback"
-          placeholder="Podaj nazwę"
+          placeholder-translate="##name.ask##"
           :state="settings.isValid.value.name"
           @blur="() => settings.onTouched('name')" />
-        <BFormInvalidFeedback class="feedback" id="device-name-feedback">Nazwa jest wymagana</BFormInvalidFeedback>
+        <BFormInvalidFeedback class="feedback" id="device-name-feedback" data-translate="name.required">
+          Name is required
+        </BFormInvalidFeedback>
       </BFormGroup>
       <BFormGroup>
-        <BFormText for="device-shortName">Skrót</BFormText>
+        <BFormText for="device-shortName" data-translate="shortcut">Shortcut</BFormText>
         <BFormInput
           id="device-shortName"
           v-model.trim="settings.v.shortName"
@@ -108,12 +110,12 @@ watch(
           :state="settings.isValid.value.shortName"
           @blur="() => settings.onTouched('shortName')"
           aria-describedby="device-shortName-feedback" />
-        <BFormInvalidFeedback class="feedback" id="device-shortName-feedback">
-          Skrót powinien zawierać do 4 znaków
+        <BFormInvalidFeedback class="feedback" id="device-shortName-feedback" data-translate="shortcut.info">
+          Shortcut has to contain maximum of 4 characters
         </BFormInvalidFeedback>
       </BFormGroup>
       <BFormGroup>
-        <BFormText for="device-address">Adres MAC</BFormText>
+        <BFormText for="device-address" data-translate="mac-address">MAC Address</BFormText>
         <BFormInput
           id="device-address"
           v-model.trim="settings.v.address"
@@ -132,14 +134,16 @@ watch(
           :state="settings.isValid.value.address"
           @blur="() => settings.onTouched('address')"
           aria-describedby="device-address-feedback" />
-        <BFormInvalidFeedback class="feedback" id="device-address-feedback">
-          Adres MAC powinien zawierać maksymalnie 12 cyfr lub liter (A-F)
+        <BFormInvalidFeedback class="feedback" id="device-address-feedback" data-translate="mac-address.info">
+          MAC address has to contain maximum of 12 digits or letters (A-F)
         </BFormInvalidFeedback>
       </BFormGroup>
       <hr />
       <BFormGroup>
-        <small class="text-body-secondary form-text"> Pozycja na siatce </small>
-        <BFormInvalidFeedback :state="settings.isValid.value.position">Pozycja jest wymagana</BFormInvalidFeedback>
+        <small class="text-body-secondary form-text" data-translate="grid-position">Grid position</small>
+        <BFormInvalidFeedback :state="settings.isValid.value.position" data-translate="grid-position.error">
+          Position is required
+        </BFormInvalidFeedback>
         <DeviceGrid
           ref="deviceGrid"
           v-model:position="settings.v.position"
@@ -150,7 +154,7 @@ watch(
           select-by-default />
       </BFormGroup>
       <hr />
-      <BButton class="mt-3" type="submit" variant="primary">{{ props.edit ? 'Zaktualizuj' : 'Dodaj' }}</BButton>
+      <BButton class="mt-3" type="submit" variant="primary">{{ props.edit ? '##update##' : '##add##' }}</BButton>
     </BForm>
   </BOffcanvas>
   <ConfirmationModal ref="confirmationModal" />

@@ -106,13 +106,13 @@ function checkDefaultType(item: NavItem<Id, T>) {
       <BNavItem class="vertical-line" link-class="link" v-if="!token.isLoggedIn" @click="() => (showLoginModal = true)">
         <div class="link">
           <PhSignIn class="icon" />
-          <span data-translate="login"> Log in </span>
+          <span data-translate="user.log-in"> Log in </span>
         </div>
       </BNavItem>
       <BNavItem class="vertical-line" link-class="link" v-else @click="token.logout">
         <div class="link">
           <PhSignOut class="icon" />
-          <span data-translate="logout"> Log out </span>
+          <span data-translate="user.log-out"> Log out </span>
         </div>
       </BNavItem>
     </BNav>

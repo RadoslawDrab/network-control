@@ -64,15 +64,15 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
   switch (type) {
     case 'add':
       prefix = '+';
-      note = 'Dodano';
+      note = '##added##';
       break;
     case 'remove':
       prefix = '-';
-      note = 'Odjęto';
+      note = '##substracted##';
       break;
     default:
       prefix = '';
-      note = 'Zmieniono';
+      note = '##updated##';
   }
   try {
     await promise(
@@ -81,10 +81,10 @@ async function unlock(time: number, type: 'add' | 'change' | 'remove' = 'change'
       { body: JSON.stringify({ time: `${prefix}${time * 60 * 1000}` }), method: 'POST' }
     );
     device.value = await promise<Device>(`/device/${device.value.address}`);
-    toast.show(`${note} czas`, { variant: 'info' });
+    toast.show(`${note} ##;time##`, { variant: 'info' });
     await auth.get();
   } catch (error) {
-    toast.show('Błąd', { variant: 'danger', body: error.message });
+    toast.show('##error##', { variant: 'danger', body: error.message });
   }
 }
 async function set(type: 'restart' | 'shutdown' | 'time') {
@@ -93,16 +93,16 @@ async function set(type: 'restart' | 'shutdown' | 'time') {
   try {
     switch (type) {
       case 'restart':
-        note = 'Rozpoczęto restart urządzenia';
-        options.title = 'Rozpocząć restart?';
+        note = '##device.confirmation.restart-started##';
+        options.title = '##device.confirmation.restart##';
         break;
       case 'shutdown':
-        note = 'Rozpoczęto wyłączenie urządzenia';
-        options.title = 'Rozpocząć wyłączenie?';
+        note = '##device.confirmation.shutdown-started##';
+        options.title = '##device.confirmation.shutdown##';
         break;
       case 'time':
-        note = 'Pokazano czas na urządzeniu';
-        options.title = 'Pokazać czas?';
+        note = '##device.confirmation.time-shown##';
+        options.title = '##device.confirmation.time-show##';
         break;
     }
     await confirmationModal.value.show(options);
@@ -110,7 +110,7 @@ async function set(type: 'restart' | 'shutdown' | 'time') {
     return;
   }
   try {
-    if (!device.value.address) throw { message: 'No MAC address provided' };
+    if (!device.value.address) throw { message: '##mac-address.error.no##' };
 
     await promise(
       `/status/set/${device.value.address}`,
@@ -120,14 +120,14 @@ async function set(type: 'restart' | 'shutdown' | 'time') {
     toast.show(note, { variant: 'info' });
     await auth.get();
   } catch (error) {
-    toast.show('Błąd', { variant: 'danger', body: error.message });
+    toast.show('##error##', { variant: 'danger', body: error.message });
   }
 }
 async function deleteDevice() {
   try {
     await confirmationModal.value.show({
-      title: 'Potwierdzenie',
-      text: `Usunąć <b>${device.value.name}</b>${
+      title: '##confirmation##',
+      text: `##device.confirmation.delete##: <b>${device.value.name}</b>${
         device.value.shortName ? ` (${device.value.shortName})` : ''
       } <small class="text-secondary">${macAddress.value}</small>`,
     });
@@ -135,10 +135,10 @@ async function deleteDevice() {
     return;
   }
   try {
-    if (!device.value.address) throw { message: 'No MAC address provided' };
+    if (!device.value.address) throw { message: '##mac-address.error.no##' };
 
     await auth.promise(`/device/${device.value.address}`, {}, { method: 'DELETE' });
-    toast.show('Deleted device', { variant: 'success' });
+    toast.show('##device.removed##', { variant: 'success' });
     emit('delete', device.value);
     device.value = null;
     await auth.get();
@@ -149,14 +149,14 @@ async function deleteDevice() {
 async function updateDevice(settings: Device) {
   try {
     await auth.promise(`/device/${device.value.address}`, {}, { method: 'PUT', body: JSON.stringify(settings) });
-    toast.show('Updated device', { variant: 'success' });
+    toast.show('##updated## ##;device##', { variant: 'success' });
     await props.deviceGrid?.auth.get();
     const differentPosition =
       device.value.position[0] !== settings.position[0] || device.value.position[1] !== settings.position[1];
     device.value = differentPosition ? null : settings;
     await auth.get();
   } catch (error) {
-    toast.show('Error', { variant: 'danger', body: error.message });
+    toast.show('##error##', { variant: 'danger', body: error.message });
   }
 }
 </script>
@@ -174,20 +174,25 @@ async function updateDevice(settings: Device) {
               <div
                 class="icon d-flex justify-content-center align-items-end"
                 tooltip
-                :aria-label="`Urządzenie jest ${isOnline ? 'włączone' : 'wyłączone'}`">
+                :aria-label-translate="isOnline ? '##device.is-online##' : '##device.is-offline##'">
                 <PhCircle weight="fill" size="75%" :data-online="isOnline" />
               </div>
               <span class="fs-6 text-body text-body-tertiary">{{ macAddress }}</span>
             </div>
             <span class="fs-6 text-body text-body-tertiary">
-              Odblokowany do:
+              ##device.unlocked-to##:
               {{ new Date(device.lockAfter).toLocaleTimeString([], { timeStyle: 'short' }) }}
               ({{ new Date(device.lockAfter).toLocaleDateString([]) }})
             </span>
           </footer>
         </div>
         <div class="vertical align-self-start" v-if="token.isLoggedIn">
-          <BButton @click="deleteDevice" class="p-0" variant="outline-danger" tooltip aria-label="Usuń urządzenie">
+          <BButton
+            @click="deleteDevice"
+            class="p-0"
+            variant="outline-danger"
+            tooltip
+            aria-label-translate="##device.remove##">
             <PhX class="m-1" weight="bold" size="1.25rem" />
           </BButton>
           <BButton
@@ -195,14 +200,14 @@ async function updateDevice(settings: Device) {
             class="p-0"
             variant="outline-secondary"
             tooltip
-            aria-label="Edytuj urządzenie">
+            aria-label-translate="##device.edit##">
             <PhGear class="m-1" weight="bold" size="1.25rem" />
           </BButton>
         </div>
       </header>
       <div class="content">
         <div class="locks-box">
-          <h4>Zmień czas</h4>
+          <h4 data-translate="time.change">Change time</h4>
           <BButton
             v-for="lock in props.locks"
             :key="`${lock.time}-${lock.value}`"
@@ -213,7 +218,7 @@ async function updateDevice(settings: Device) {
           </BButton>
         </div>
         <div class="locks-box">
-          <h4>Dodaj czas</h4>
+          <h4 data-translate="time.add">Add time</h4>
           <BButton
             v-for="lock in props.locks.filter((lock) => lock.time > 0)"
             :key="`${lock.time}-${lock.value}`"
@@ -224,7 +229,7 @@ async function updateDevice(settings: Device) {
           </BButton>
         </div>
         <div class="locks-box">
-          <h4>Usuń czas</h4>
+          <h4 data-translate="time.remove">Remove time</h4>
           <BButton
             v-for="lock in props.locks.filter((lock) => lock.time > 0)"
             :key="`${lock.time}-${lock.value}`"
@@ -237,26 +242,26 @@ async function updateDevice(settings: Device) {
         <aside>
           <BButton @click="() => set('time')" variant="outline-primary" class="button" :disabled="!isOnline">
             <PhAlarm class="icon" />
-            Pokaż czas
+            <span data-translate="time.show">Show time</span>
           </BButton>
           <BButton @click="() => unlock(0, 'change')" variant="outline-primary" class="button">
             <PhClockCounterClockwise class="icon" />
-            Resetuj czas
+            <span data-translate="time.reset">Reset time</span>
           </BButton>
           <BButton @click="() => set('shutdown')" variant="outline-danger" class="button" :disabled="!isOnline">
             <PhArrowCircleDown class="icon" />
-            Wyłącz
+            <span data-translate="shutdown">Shutdown</span>
           </BButton>
           <BButton @click="() => set('restart')" variant="outline-danger" class="button" :disabled="!isOnline">
             <PhArrowCounterClockwise class="icon" />
-            Uruchom ponownie
+            <span data-translate="restart">Restart</span>
           </BButton>
           <ConfirmationModal ref="confirmationModal" />
         </aside>
       </div>
       <DeviceFormOffcanvas v-model="editDeviceForm" :default-settings="device" edit @submit="updateDevice" />
     </BForm>
-    <div v-else>Nie wybrano urządzenia</div>
+    <div v-else data-translate="device.not-selected">Device not selected</div>
   </aside>
 </template>
 <style scoped lang="scss">

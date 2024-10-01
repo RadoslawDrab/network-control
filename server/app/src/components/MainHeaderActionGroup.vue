@@ -20,7 +20,7 @@ const props = defineProps<{
       <span v-if="item.html" v-html="item.html"></span>
       <span v-else class="d-flex gap-2 align-items-center">
         <slot :="item"></slot>
-        <span :data-translate="item.text ?? item.id">
+        <span>
           {{ item.text ?? item.id }}
         </span>
       </span>

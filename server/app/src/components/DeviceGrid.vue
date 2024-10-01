@@ -58,6 +58,7 @@ const auth = usePromiseAuth<Device[]>({
   },
   checkAuth: props.checkAuth,
 });
+
 const grid = ref<Cell[]>([]);
 const currentDevices = ref<Device[]>([]);
 
@@ -177,7 +178,9 @@ defineExpose({ auth, gridSize, resetPosition });
       :disabled="item.disabled"
       @blur="() => emit('blur', item)"
       :tooltip="props.tooltips"
-      :aria-label="`${item.name} (${item.shortName}): ${item.online ? 'online' : 'offline'}`"
+      :aria-label-translate="`${item.name} ${item.shortName ? ` (${item.shortName})` : ''}: ${
+        item.online ? '##online##' : '##offline##'
+      }`"
       tooltip-fixed>
       {{ item.shortName?.slice(0, 4) ?? 'PC' }}
     </button>
@@ -223,19 +226,16 @@ defineExpose({ auth, gridSize, resetPosition });
         &[data-unlocked='true'] {
           --pulse-bg-color-1: var(--bs-success);
           --pulse-border-color-1: var(--bs-success);
-          --pulse-color-1: var(--bs-body-bg);
         }
         &[data-online='false'] {
           --pulse-bg-color-1: var(--bs-tertiary-bg);
           --pulse-border-color-1: var(--bs-danger);
           --pulse-border-color-2: var(--bs-danger-bg-subtle);
-          --pulse-color-1: var(--bs-body);
         }
       }
       &[data-selected='true'] {
         --pulse-bg-color-1: var(--bs-primary);
         --pulse-border-color-1: var(--bs-primary);
-        --pulse-color-1: var(--bs-body-bg);
 
         &[data-used='true'] {
           &[data-unlocked='true'] {
@@ -245,7 +245,6 @@ defineExpose({ auth, gridSize, resetPosition });
             --pulse-border-color-1: var(--bs-danger);
             --pulse-bg-color-1: var(--bs-danger);
             --pulse-bg-color-2: var(--bs-danger-bg-subtle);
-            --pulse-color-1: var(--bs-body-bg);
           }
         }
       }

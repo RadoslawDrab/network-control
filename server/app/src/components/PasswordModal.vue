@@ -45,9 +45,9 @@ async function onPasswordSubmit() {
   try {
     if (feedback.allValid) {
       if (props.newPassword && token.exists()) {
-        await confirmationModal.value.show({ title: 'Zmienić hasło?' });
+        await confirmationModal.value.show({ title: '##password.ask.change##' });
         await changePassword(feedback.v.password, token.currentToken);
-        showToast('Changed password', { variant: 'success' });
+        showToast('##password.changed##', { variant: 'success' });
         token.logout();
       } else {
         token.setPassword(feedback.v.password);
@@ -57,7 +57,7 @@ async function onPasswordSubmit() {
     }
   } catch (error) {
     show.value = true;
-    showToast(error.message ?? 'Error', { variant: 'danger' });
+    showToast(error.message ?? '##error##', { variant: 'danger' });
   } finally {
     await feedback.reset();
   }
@@ -67,28 +67,38 @@ async function check() {
     const check = await token.check(true);
     isValid.value = check;
 
-    showToast(check ? 'Logged in' : 'Failed to log in', { time: 5000, variant: check ? 'success' : 'danger' });
+    showToast(check ? '##user.logged-in##' : '##user.error.logged-in##', {
+      time: 5000,
+      variant: check ? 'success' : 'danger',
+    });
 
     if (!check) {
       token.removeToken();
     }
     return check;
   } catch (error) {
-    showToast('Error', { variant: 'danger', body: error.message });
+    showToast('##error##', { variant: 'danger', body: error.message });
   }
 }
 </script>
 <template>
-  <BModal
-    v-model="show"
-    cancel-title="Anuluj"
-    :title="`${props.newPassword ? 'Zmiana hasła' : 'Logowanie'} administratora`"
-    centered
-    @close="feedback.reset"
-    @ok="onPasswordSubmit">
+  <BModal v-model="show" centered @close="feedback.reset">
+    <template #title>
+      <span v-if="props.newPassword" data-translate="password.change">Change password</span>
+      <span v-else data-translate="user.log-in">Log in</span>
+    </template>
+    <template #ok>
+      <BButton data-translate="ok" variant="primary" @click="onPasswordSubmit">OK</BButton>
+    </template>
+    <template #cancel>
+      <BButton data-translate="cancel" variant="secondary" @click="() => (show = false)"> Cancel </BButton>
+    </template>
     <BForm @submit="onPasswordSubmit" class="d-flex flex-column gap-1">
       <BFormGroup>
-        <BFormText for="password-input">Podaj {{ props.newPassword ? 'nowe ' : '' }}hasło:</BFormText>
+        <BFormText for="password-input">
+          <span v-if="props.newPassword" data-translate="##password.new-enter##:">Enter new password:</span>
+          <span v-else data-translate="##password.enter##:">Enter password:</span>
+        </BFormText>
         <BFormInput
           id="password-input"
           v-model="feedback.v.password"
@@ -96,12 +106,18 @@ async function check() {
           @blur="() => feedback.onTouched('password')"
           type="password"
           aria-describedby="password-feedback" />
-        <BFormInvalidFeedback id="password-feedback">
-          Hasło musi zawierać małe i duże litery, liczby, znaki specjalne oraz musi mieć więcej niż 7 znaków
+        <BFormInvalidFeedback id="password-feedback" data-translate="password.info">
+          Password has to include lowercase and uppercase letter, digit, special character and must be longer than 7
+          characters
         </BFormInvalidFeedback>
       </BFormGroup>
       <BFormGroup>
-        <BFormText for="confirmation-password-input" v-if="props.newPassword">Powtórz hasło:</BFormText>
+        <BFormText
+          for="confirmation-password-input"
+          v-if="props.newPassword"
+          data-translate="##password.new-enter-repeat##:">
+          Enter new password again:
+        </BFormText>
         <BFormInput
           id="confirmation-password-input"
           v-if="props.newPassword"
@@ -110,7 +126,9 @@ async function check() {
           @blur="() => feedback.onTouched('passwordConfirmation')"
           type="password"
           aria-describedby="password-confirmation-feedback" />
-        <BFormInvalidFeedback id="password-confirmation-feedback"> Hasła nie są takie same </BFormInvalidFeedback>
+        <BFormInvalidFeedback id="password-confirmation-feedback" data-translate="password.not-the-same">
+          Passwords are not the same
+        </BFormInvalidFeedback>
       </BFormGroup>
     </BForm>
     <ConfirmationModal ref="confirmationModal" />

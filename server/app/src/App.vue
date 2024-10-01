@@ -1,10 +1,11 @@
 <script setup lang="tsx">
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { PhAlarm, PhArrowCounterClockwise, PhDesktop, PhPassword } from '@phosphor-icons/vue';
 
 import { promise } from 'utils/server';
 import usePromiseAuth from 'composables/usePromiseAuth';
 import useToast from 'composables/useToast';
+import useLanguage from 'composables/useLanguage';
 
 import DeviceGrid from 'components/DeviceGrid.vue';
 import { NavItem } from 'components/MainHeader.vue';
@@ -22,16 +23,26 @@ const show = reactive<{
   adminForm: false,
   showTimeInfo: false,
 });
+type NavItemKeys = keyof typeof show | 'refreshInfo' | 'language';
 
-const navItems = ref<NavItem<keyof typeof show | 'refreshInfo'>[]>([
+const lang = useLanguage();
+const navItems = ref<NavItem<NavItemKeys>[]>([
   {
     id: 'addDeviceForm',
-    text: 'Dodaj komputer',
+    text: '##device.add##',
     passwordRequired: true,
   },
-  { id: 'changePasswordModal', text: 'Zmień hasło', passwordRequired: true },
-  { id: 'showTimeInfo', text: 'Pokaż czas', callback: showTimeInfo },
-  { id: 'refreshInfo', text: 'Odśwież', callback: refreshInfo },
+  { id: 'changePasswordModal', text: '##password.change##', passwordRequired: true },
+  { id: 'showTimeInfo', text: '##time.show##', callback: showTimeInfo },
+  { id: 'refreshInfo', text: '##refresh##', callback: refreshInfo },
+  ...lang.languages.map<NavItem<NavItemKeys>>((language) => ({
+    id: 'language',
+    text: language.toUpperCase(),
+    callback: lang.setLanguage,
+    type: 'language',
+    value: language,
+    active: lang.isCurrentLanguage(language),
+  })),
   // { id: 'adminForm', html: 'Ustawienia administracyjne', passwordRequired: true },
 ]);
 const selectedDevice = ref<Device | null>(null);
@@ -95,6 +106,14 @@ async function refreshInfo() {
     toast.show('Błąd', { variant: 'danger', body: error.message });
   }
 }
+watch(lang.language, (language) => {
+  navItems.value = navItems.value.map((item) => {
+    if (item.type === 'language') {
+      return { ...item, active: item.value === language };
+    }
+    return item;
+  });
+});
 </script>
 <template>
   <BContainer class="d-flex flex-column gap-2">

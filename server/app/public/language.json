@@ -2,36 +2,123 @@
   "template": "##TEMPLATE##",
   "fallbackText": "NOT_FOUND",
   "attributeName": "translate",
-  "attributes": ["aria-label"],
+  "attributes": ["aria-label", "placeholder"],
   "languages": ["en", "pl"],
 
   "labels": {
     "ok": ["OK", "OK"],
     "cancel": ["Cancel", "Anuluj"],
+    "canceled": ["Canceled", "Anulowano"],
+    "yes": ["Yes", "Tak"],
+    "no": ["No", "Nie"],
+    "confirmation": ["Confirmation", "Potwierdzenie"],
     "language": ["Language", "Język"],
     "online": ["Online", "Włączone"],
     "offline": ["Offline", "Wyłączone"],
     "shutdown": ["Shutdown", "Wyłącz"],
     "restart": ["Restart", "Uruchom ponownie"],
     "refresh": ["Refresh", "Odśwież"],
-    "login": ["Log in", "Zaloguj się"],
-    "logout": ["Log out", "Wyloguj się"],
-    "mode.dark": ["Dark mode", "Tryb ciemny"],
-    "mode.light": ["Light mode", "Tryb jasny"],
-    "options.main": ["Main", "Główne"],
-    "options.administration": ["Administration", "Administracja"],
-    "password.change": ["Change password", "Zmień hasło"],
-    "password.enter": ["Enter password:", "Podaj hasło:"],
-    "password.new-enter": ["Enter new password:", "Podaj nowe hasło:"],
-    "password.new-enter-repeat": ["Enter new password again:", "Podaj ponownie nowe hasło:"],
-    "time": ["time", "czas"],
-    "time.reset": ["Reset time", "Resetuj czas"],
-    "time.change": ["Change time", "Zmień czas"],
-    "time.add": ["Add time", "Dodaj czas"],
-    "time.remove": ["Remove time", "Usuń czas"],
-    "time.show": ["Show time", "Pokaż czas"],
-    "device.shutdown": ["Shutdown device", "Wyłącz urządzenie"],
-    "device.restart": ["Restart device", "Uruchom ponownie urządzenie"],
-    "device.add": ["Add device", "Dodaj urządzenie"]
+    "mode": {
+      "dark": ["Dark mode", "Tryb ciemny"],
+      "light": ["Light mode", "Tryb jasny"]
+    },
+    "add": ["Add", "Dodaj"],
+    "added": ["Added", "Dodano"],
+    "substract": ["Substract", "Odejmij"],
+    "substracted": ["Substracted", "Odjęto"],
+    "remove": ["Remove", "Usuń"],
+    "removed": ["Removed", "Usunięto"],
+    "update": ["Update", "Zaktualizuj"],
+    "updated": ["Updated", "Zaktualizowano"],
+    "error": {
+      "default": ["Error", "Błąd"],
+      "not-enough-data": ["Not enough data", "Nie wystarczająco danych"]
+    },
+    "options": {
+      "main": ["Main", "Główne"],
+      "administration": ["Administration", "Administracja"]
+    },
+    "name": {
+      "default": ["Name", "Nazwa"],
+      "required": ["Name is required", "Nazwa jest wymagana"],
+      "ask": {
+        "default": ["Enter name", "Podaj nazwę"]
+      }
+    },
+    "shortcut": {
+      "default": ["Shortcut", "Skrót"],
+      "info": ["Shortcut has to contain maximum of 4 characters", "Skrót powinien zawierać do 4 znaków"]
+    },
+    "mac-address": {
+      "default": ["MAC Address", "Adres MAC"],
+      "info": [
+        "MAC address has to contain maximum of 12 digits or letters (A-F)",
+        "Adres MAC powinien zawierać maksymalnie 12 cyfr lub liter (A-F)"
+      ],
+      "error": {
+        "no": ["No MAC address provided", "Nie podano adresu MAC"]
+      }
+    },
+    "grid-position": {
+      "default": ["Grid position", "Pozycja na siatce"],
+      "error": {
+        "default": ["Position is required", "Pozycja jest wymagana"]
+      }
+    },
+    "user": {
+      "log-in": ["Log in", "Zaloguj się"],
+      "log-out": ["Log out", "Wyloguj się"],
+      "logged-in": {
+        "default": ["Logged in", "Zalogowano się"],
+        "error": ["Failed to log in", "Nie udało się zalogować"]
+      }
+    },
+    "password": {
+      "info": [
+        "Password has to include lowercase and uppercase letter, digit, special character and must be longer than 7 characters",
+        "Hasło musi zawierać małe i duże litery, liczby, znaki specjalne oraz musi mieć więcej niż 7 znaków"
+      ],
+      "not-the-same": ["Passwords are not the same", "Hasła nie są takie same"],
+      "ask": {
+        "change": ["Do you want to change password?", "Czy chcesz zmienić hasło?"]
+      },
+      "change": ["Change password", "Zmień hasło"],
+      "changed": ["Changed password", "Zmieniono hasło"],
+      "enter": ["Enter password", "Podaj hasło"],
+      "new-enter": ["Enter new password", "Podaj nowe hasło"],
+      "new-enter-repeat": ["Enter new password again", "Podaj ponownie nowe hasło"]
+    },
+    "time": {
+      "default": ["time", "czas"],
+      "reset": ["Reset time", "Resetuj czas"],
+      "change": ["Change time", "Zmień czas"],
+      "add": ["Add time", "Dodaj czas"],
+      "remove": ["Remove time", "Usuń czas"],
+      "show": ["Show time", "Pokaż czas"]
+    },
+    "device": {
+      "default": ["Device", "Urządzenie"],
+      "shutdown": ["Shutdown device", "Wyłącz urządzenie"],
+      "restart": ["Restart device", "Uruchom ponownie urządzenie"],
+      "add": ["Add device", "Dodaj urządzenie"],
+      "edit": ["Edit device", "Edytuj urządzenie"],
+      "remove": ["Remove device", "Usuń urządzenie"],
+      "removed": ["Removed device", "Usunięto urządzenie"],
+      "not-selected": ["Device not selected", "Nie wybrano urządzenia"],
+      "unlocked-to": ["Unlocked to", "Odblokowany do"],
+      "is-online": ["Device is online", "Urządzenie jest włączone"],
+      "is-offline": ["Device is offline", "Urządzenie jest wyłączone"],
+      "confirmation": {
+        "edit": ["Confirm device edit", "Potwierdź edycję urządzenia"],
+        "add": ["Confirm adding device", "Potwierdź dodanie urządzenia"],
+        "restart": ["Confirm restarting device", "Potwierdź restart urządzenia"],
+        "restart-started": ["Restarting device", "Rozpoczęto restart urządzenia"],
+        "shutdown": ["Confirm device shutdown", "Potwierdź wyłączenie urządzenia"],
+        "shutdown-started": ["Shutting down device", "Wyłączenie urządzenia"],
+        "time-show": ["Confirm showing time", "Potwierdź pokazanie czasu urządzenia"],
+        "time-shown": ["Showed time", "Pokazano czas urządzenia"],
+        "delete": ["Confirm deleting device", "Potwierdź usunięcie urządzenia"]
+      }
+    }
   }
 }
