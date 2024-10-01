@@ -83,7 +83,10 @@ const useLanguage = <
     });
 
     mutationObserver.observe(document.documentElement, { attributeFilter: ['lang'] });
-    mutationObserver.observe(document.body, { subtree: true, attributes: true });
+    mutationObserver.observe(document.body, {
+      subtree: true,
+      attributeFilter: [...options.value.attributes, `data-${attributeName.value}`],
+    });
 
     new MutationObserver((mutations) => {
       for (const mutation of mutations) {
