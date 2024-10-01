@@ -1,16 +1,18 @@
 import requests
 import re
+import os
 import window as w
 from win11toast import notify
 from time import sleep
 from utils import *
 from customIO import getMac, setKeyboardBlock, setMouseBlock
 from math import floor
+import argparse
 
 interval: float = 1
 includeInterfaces: list[str] = []
 ip: str = ''
-savedTime: int = 0
+savedTime: int = 100000
 connectionError: bool = False
 tryToConnectAfter: int = 120
 connectionTimeout: int = 5
@@ -20,6 +22,10 @@ iteration: int = 0
 createdInfo = False
 
 
+parser = argparse.ArgumentParser(prefix_chars='--')
+parser.add_argument('--path', help='Path where to search for config files', type=str)
+
+args = parser.parse_args()
 
 window = w.createBlockInfo()
 
@@ -40,18 +46,24 @@ def init():
         return [re.sub(param + '=', '', line), param]
   global includeInterfaces, savedTime, tryToConnectAfter, connectionTimeout
   
+  path = './'
+  if args.path:
+    path = os.path.abspath(args.path)
+    print(path)
+  interfacesFilePath = os.path.join(path, 'interfaces.txt')
   try:
-    file = open('./interfaces.txt', 'r')
+    file = open(interfacesFilePath, 'r')
     lines = file.readlines()
     for line in lines:
       includeInterfaces += [re.sub('\\n', '', line)]
 
   except FileNotFoundError:
-    print('No file \'interface.txt\' exists')
+    print(f'No file \'{interfacesFilePath}\' exists')
   
   try:
     global ip, interval
-    file = open('./.conf', 'r')
+    confFilePath = os.path.join(path, '.conf')
+    file = open(confFilePath, 'r')
     lines = file.readlines()
     for line in lines:
       if line.startswith('#'): continue
@@ -68,9 +80,7 @@ def init():
       elif param == 'connectionTimeout':
         connectionTimeout = int(value)
   except FileNotFoundError:
-    global iterate
-    print('No file \'.conf\' exists')
-    iterate = False
+    print(f'No file \'{confFilePath}\' exists')
 
   window.start(False, get, interval * 1000)
 def get():
