@@ -1,0 +1,10 @@
+{
+  "include": ["./src/**/*.ts", "./env.d.ts"],
+  "exclude": ["node_modules/"],
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./src"
+  }
+}

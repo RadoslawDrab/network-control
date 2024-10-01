@@ -1,0 +1,44 @@
+@import './variables';
+@import 'bootstrap/scss/bootstrap';
+
+.icon,
+.icon svg {
+  vertical-align: unset;
+}
+[tooltip='true'],
+[tooltip] {
+  &[aria-label]:not(:disabled) {
+    position: relative;
+    &::before {
+      content: attr(aria-label);
+      z-index: 100;
+      position: absolute;
+      top: calc(100% + 0.25em);
+      left: 50%;
+      transform: translateX(-50%);
+      width: max-content;
+
+      padding: 0.25em 0.5em;
+      font-size: 0.75em;
+      border: 1px solid var(--bs-body-color);
+      border-radius: 5px;
+      background-color: var(--bs-body-bg);
+      color: var(--bs-body-color);
+
+      transition: all 0.25s;
+      opacity: 0;
+      pointer-events: none;
+    }
+    &:hover::before {
+      opacity: 1;
+    }
+    &[tooltip-fixed]::before {
+      position: fixed;
+      left: 1em;
+      top: auto;
+      bottom: 1em;
+      transform: none;
+      font-size: 1rem;
+    }
+  }
+}
