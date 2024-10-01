@@ -22,7 +22,6 @@ declare module 'vue' {
     BModal: typeof import('bootstrap-vue-next')['BModal']
     BNav: typeof import('bootstrap-vue-next')['BNav']
     BNavItem: typeof import('bootstrap-vue-next')['BNavItem']
-    BNavItemDropdown: typeof import('bootstrap-vue-next')['BNavItemDropdown']
     BOffcanvas: typeof import('bootstrap-vue-next')['BOffcanvas']
     BRow: typeof import('bootstrap-vue-next')['BRow']
     BToastOrchestrator: typeof import('bootstrap-vue-next')['BToastOrchestrator']

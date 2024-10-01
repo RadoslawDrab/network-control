@@ -67,9 +67,9 @@ async function onDeviceAdded(device: Device) {
   try {
     await auth.promise('/device', {}, { method: 'POST', body: JSON.stringify(device) });
     await deviceGrid.value.auth.get();
-    toast.show('Device added', { variant: 'success' });
+    toast.show('##device.added##', { variant: 'success' });
   } catch (error) {
-    toast.show('Error', { variant: 'danger', body: error.message });
+    toast.show('##error##', { variant: 'danger', body: error.message });
   }
 }
 async function onDeviceClick(device: Device) {
@@ -93,17 +93,17 @@ function onAdminFormSubmit(settings: Settings) {
 async function showTimeInfo() {
   try {
     await promise('/status', {}, { method: 'POST' });
-    toast.show('Pokazano pozostały czas', { variant: 'info' });
+    toast.show('##device.confirmation.time-shown##', { variant: 'info' });
   } catch (error) {
-    toast.show('Błąd', { variant: 'danger', body: error.message });
+    toast.show('##error##', { variant: 'danger', body: error.message });
   }
 }
 async function refreshInfo() {
   try {
     await deviceGrid.value.auth.get();
-    toast.show('Odświeżono', { variant: 'info' });
+    toast.show('##refreshed##', { variant: 'info' });
   } catch (error) {
-    toast.show('Błąd', { variant: 'danger', body: error.message });
+    toast.show('##error##', { variant: 'danger', body: error.message });
   }
 }
 watch(lang.language, (language) => {

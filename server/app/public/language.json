@@ -18,6 +18,7 @@
     "shutdown": ["Shutdown", "Wyłącz"],
     "restart": ["Restart", "Uruchom ponownie"],
     "refresh": ["Refresh", "Odśwież"],
+    "refreshed": ["Refreshed", "Odświeżono"],
     "mode": {
       "dark": ["Dark mode", "Tryb ciemny"],
       "light": ["Light mode", "Tryb jasny"]
@@ -101,6 +102,7 @@
       "shutdown": ["Shutdown device", "Wyłącz urządzenie"],
       "restart": ["Restart device", "Uruchom ponownie urządzenie"],
       "add": ["Add device", "Dodaj urządzenie"],
+      "added": ["Added device", "Dodano urządzenie"],
       "edit": ["Edit device", "Edytuj urządzenie"],
       "remove": ["Remove device", "Usuń urządzenie"],
       "removed": ["Removed device", "Usunięto urządzenie"],
