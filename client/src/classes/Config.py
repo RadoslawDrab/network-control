@@ -8,7 +8,7 @@ class AppConfig:
   reconnection_time: int = 300
   connection_timeout: int = 3
   interfaces: list[str] = ['^Ethernet$']
-  
+  logs_path: str = './logs'
 class Config(AppConfig):
   def __init__(self, path: Path):
     self.__path = Path(path, 'settings.conf')
