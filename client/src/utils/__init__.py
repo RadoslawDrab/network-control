@@ -1,7 +1,5 @@
 import threading
 
-
-
 def runInParallel(*fns):
   threads: list[threading.Thread] = []
   # if __name__ == "__main__":

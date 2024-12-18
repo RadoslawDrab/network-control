@@ -1,13 +1,15 @@
 import requests
 import re
 import os
-import window as w
 from win11toast import notify
 from time import sleep
-from utils import *
-from customIO import getMac, setKeyboardBlock, setMouseBlock
 from math import floor
-import argparse
+
+import utils.window as w
+from utils import *
+from utils.custom_io import getMac, setKeyboardBlock, setMouseBlock
+
+from classes.Arguments import Arguments
 
 interval: float = 1
 includeInterfaces: list[str] = []
@@ -22,11 +24,8 @@ iteration: int = 0
 createdInfo = False
 
 
-parser = argparse.ArgumentParser(prefix_chars='--')
-parser.add_argument('--path', help='Path where to search for config files', type=str)
 
-args = parser.parse_args()
-
+args = Arguments()
 window = w.createBlockInfo()
 
 NoticationType = enum(urgent='urgent', alarm='alarm')
@@ -46,11 +45,7 @@ def init():
         return [re.sub(param + '=', '', line), param]
   global includeInterfaces, savedTime, tryToConnectAfter, connectionTimeout
   
-  path = './'
-  if args.path:
-    path = os.path.abspath(args.path)
-    print(path)
-  interfacesFilePath = os.path.join(path, 'interfaces.txt')
+  interfacesFilePath = os.path.join(os.path.abspath(args.path), 'interfaces.txt')
   try:
     file = open(interfacesFilePath, 'r')
     lines = file.readlines()
@@ -62,7 +57,7 @@ def init():
   
   try:
     global ip, interval
-    confFilePath = os.path.join(path, '.conf')
+    confFilePath = os.path.join(os.path.abspath(args.path), '.conf')
     file = open(confFilePath, 'r')
     lines = file.readlines()
     for line in lines:
