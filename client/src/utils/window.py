@@ -20,7 +20,7 @@ class Window():
       self.worker()
 
     self.root.mainloop()
-  def setState(self, show: bool):
+  def set_state(self, show: bool):
     if show: 
       self.show()
     else:
@@ -29,14 +29,14 @@ class Window():
     self.hide()
     self.root.quit()
   def show(self):
-    if not self.isRunning():
+    if not self.is_running():
       self.root.deiconify()
       self.root.focus_set()
       self.root.lift()
   def hide(self):
-    if self.isRunning():
+    if self.is_running():
       self.root.withdraw()
-  def isRunning(self):
+  def is_running(self):
     return self.root.state() == 'normal'
   def worker(self):
     self.target()
@@ -44,7 +44,7 @@ class Window():
       self.root.after(max(self.time, 100), self.worker)
 
 
-def createBlockInfo():
+def create_block_info():
   window = Window('block')
   window.root.title('ALERT')
   window.root.configure(padx=100, pady=100)
@@ -59,7 +59,7 @@ def createBlockInfo():
   window.hide()
   return window
 
-def createTimeInfo(minutes: int):
+def create_time_info(minutes: int):
   hours = math.floor(minutes / 60)
   time = minutes
   note = 'minut'

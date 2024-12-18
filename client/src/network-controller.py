@@ -1,5 +1,4 @@
 import requests
-import re
 import os
 from win11toast import notify
 from time import sleep
@@ -8,7 +7,7 @@ from pathlib import Path
 
 import utils.window as w
 from utils import *
-from utils.custom_io import getMac, setKeyboardBlock, setMouseBlock
+from utils.custom_io import get_mac_address, set_keyboard_block, set_mouse_block
 
 from classes.Arguments import Arguments
 from classes.Config import Config
@@ -16,22 +15,22 @@ from classes.Logs import Logs
 
 NoticationType = enum(urgent='urgent', alarm='alarm')
 
-connectionError: bool = False
+connection_error: bool = False
 iteration: int = 0
-createdInfo: bool = False
-savedTime: int = 0
+created_info: bool = False
+saved_time: int = 0
 
 def init():
-  global savedTime
+  global saved_time
   args = Arguments()
   config = Config(Path(args.path))
   logs = Logs(Path(config.logs_path), 'network-controller')
   
   iterate: bool = True
-  savedTime = config.initial_time
+  saved_time = config.initial_time
   
 
-  window = w.createBlockInfo()
+  window = w.create_block_info()
   def set_error(error: str, type: str = 'ERROR', time: int = 5, stop_iteration: bool = False, notification: bool = False, notification_type: NoticationType = 'urgent'):
     global iterate
     print(f"{type}: {error}")
@@ -44,13 +43,13 @@ def init():
   def get():
     if not iterate: return
     
-    global isLocked, createdInfo, connectionError, savedTime, iteration
+    global is_locked, created_info, connection_error, saved_time, iteration
     try:
-      addresses = getMac(config.interfaces)
+      addresses = get_mac_address(config.interfaces)
       if len(addresses) > 0:
         data: dict[str, any] = {}
-        if connectionError: 
-          newTime = max(savedTime - config.interval, 0)
+        if connection_error: 
+          newTime = max(saved_time - config.interval, 0)
           data.update({
             'isLocked': newTime <= 0,
             'timeInfo': iteration <= 5 or (newTime < 60 * 5 and newTime > (60 * 5) - 5),
@@ -59,15 +58,15 @@ def init():
           iteration += config.interval
 
           if iteration > config.reconnection_time:
-            connectionError = False
+            connection_error = False
             iteration = 0
         else:
           response = requests.get(f'{config.ip}/api/status/{addresses[0]}', timeout=config.connection_timeout * 1000)
           data = response.json() 
-          connectionError = False
+          connection_error = False
           iteration = 0
 
-        isLocked = data.get('isLocked')
+        is_locked = data.get('isLocked')
         timeInfo = data.get('timeInfo')
         shutdown = data.get('shutdown')
         restart = data.get('restart')
@@ -75,26 +74,26 @@ def init():
         remainingTime = 0
         if remainingSeconds != None:
           remainingTime = floor(remainingSeconds / 60)
-          savedTime = remainingSeconds
+          saved_time = remainingSeconds
 
-        if timeInfo and not createdInfo:
-          w.createTimeInfo(remainingTime)
-          createdInfo = True
-        elif not timeInfo and createdInfo:
-          createdInfo = False
+        if timeInfo and not created_info:
+          w.create_time_info(remainingTime)
+          created_info = True
+        elif not timeInfo and created_info:
+          created_info = False
 
         if shutdown == True:
           os.system('shutdown -t 0 -f')
         if restart == True:
           os.system('shutdown -t 0 -f -r')
 
-        if isLocked != None: 
-          setKeyboardBlock(isLocked)
-          setMouseBlock(isLocked)
+        if is_locked != None: 
+          set_keyboard_block(is_locked)
+          set_mouse_block(is_locked)
 
-          window.setState(isLocked)
-          if not isLocked:
-            print('OFFLINE' if connectionError else 'ONLINE',  remainingSeconds)
+          window.set_state(is_locked)
+          if not is_locked:
+            print('OFFLINE' if connection_error else 'ONLINE',  remainingSeconds)
         else:
           raise Exception(f"MAC address '{addresses[0]}' not registered")
       else:
@@ -102,15 +101,15 @@ def init():
       
       
     except requests.RequestException as error:
-      connectionError = True
-      savedTime -= config.connection_timeout
+      connection_error = True
+      saved_time -= config.connection_timeout
       set_error('Couldn\'t connect to server', 'REQUEST ERROR', notification=True, time=0, notification_type='alarm')
     except requests.ConnectionError as error:
-      connectionError = True
-      savedTime -= config.connection_timeout
+      connection_error = True
+      saved_time -= config.connection_timeout
       set_error(f'Connection error {error}', 'CONNECTION ERROR', notification=True, time=0, notification_type='alarm')
     except Exception as error:
-      set_error(error, notification=True, time=0, notification_type='alarm')
+      set_error(error)
 
   window.start(False, get, config.interval * 1000)
 

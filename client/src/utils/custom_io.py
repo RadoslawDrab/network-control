@@ -2,10 +2,10 @@ import psutil
 import pynput
 import re
 
-keyboardListener = pynput.keyboard.Listener(suppress=True)
-mouseListener = pynput.mouse.Listener(suppress=True)
+keyboard_listener = pynput.keyboard.Listener(suppress=True)
+mouse_listener = pynput.mouse.Listener(suppress=True)
 
-def getMac(include: list[str] = []):
+def get_mac_address(include: list[str] = []):
   addresses: list[str] = []
   for interface in psutil.net_if_addrs():
     address = psutil.net_if_addrs()[interface][0].address
@@ -15,21 +15,21 @@ def getMac(include: list[str] = []):
     else:
       addresses += [address]  
   return addresses
-def setMouseBlock(block: bool):
-    global mouseListener
+def set_mouse_block(block: bool):
+    global mouse_listener
     if block:
-      if not mouseListener.running:
-        mouseListener = pynput.mouse.Listener(suppress=True)
-        mouseListener.start()
+      if not mouse_listener.running:
+        mouse_listener = pynput.mouse.Listener(suppress=True)
+        mouse_listener.start()
     else:
-      if mouseListener.running:
-        mouseListener.stop()
-def setKeyboardBlock(block: bool):
-    global keyboardListener
+      if mouse_listener.running:
+        mouse_listener.stop()
+def set_keyboard_block(block: bool):
+    global keyboard_listener
     if block:
-      if not keyboardListener.running:
-        keyboardListener = pynput.keyboard.Listener(suppress=True)
-        keyboardListener.start()
+      if not keyboard_listener.running:
+        keyboard_listener = pynput.keyboard.Listener(suppress=True)
+        keyboard_listener.start()
     else:
-      if keyboardListener.running:
-        keyboardListener.stop()
+      if keyboard_listener.running:
+        keyboard_listener.stop()
