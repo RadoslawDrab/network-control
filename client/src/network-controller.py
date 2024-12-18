@@ -4,101 +4,65 @@ import os
 from win11toast import notify
 from time import sleep
 from math import floor
+from pathlib import Path
 
 import utils.window as w
 from utils import *
 from utils.custom_io import getMac, setKeyboardBlock, setMouseBlock
 
 from classes.Arguments import Arguments
-
-interval: float = 1
-includeInterfaces: list[str] = []
-ip: str = ''
-savedTime: int = 100000
-connectionError: bool = False
-tryToConnectAfter: int = 120
-connectionTimeout: int = 5
-
-iterate: bool = True
-iteration: int = 0
-createdInfo = False
-
-
-
-args = Arguments()
-window = w.createBlockInfo()
+from classes.Config import Config
+from classes.Logs import Logs
 
 NoticationType = enum(urgent='urgent', alarm='alarm')
 
-def setError(error: str, type: str = 'ERROR', time: int = 5, stopIteration: bool = False, notification: bool = False, notificationType: NoticationType = 'urgent'):
-  global iterate
-  print(f"{type}: {error}")
-  notification and notify(type, error, duration='short', scenario=notificationType)
-  iterate = not stopIteration
-  stopIteration and window.remove()
-  sleep(time)
+connectionError: bool = False
+iteration: int = 0
+createdInfo: bool = False
+savedTime: int = 0
 
 def init():
-  def getConfig(line: str, params: list[str]):
-    for param in params:
-      if line.startswith(param + '='):
-        return [re.sub(param + '=', '', line), param]
-  global includeInterfaces, savedTime, tryToConnectAfter, connectionTimeout
+  global savedTime
+  args = Arguments()
+  config = Config(Path(args.path))
+  logs = Logs(Path(config.logs_path), 'network-controller')
   
-  interfacesFilePath = os.path.join(os.path.abspath(args.path), 'interfaces.txt')
-  try:
-    file = open(interfacesFilePath, 'r')
-    lines = file.readlines()
-    for line in lines:
-      includeInterfaces += [re.sub('\\n', '', line)]
-
-  except FileNotFoundError:
-    print(f'No file \'{interfacesFilePath}\' exists')
+  iterate: bool = True
+  savedTime = config.initial_time
   
-  try:
-    global ip, interval
-    confFilePath = os.path.join(os.path.abspath(args.path), '.conf')
-    file = open(confFilePath, 'r')
-    lines = file.readlines()
-    for line in lines:
-      if line.startswith('#'): continue
-      line = re.sub('\\n', '', line)
-      [value, param] = getConfig(line, ['ip', 'interval', 'initialTime', 'reconnectionTime', 'connectionTimeout'])
-      if param == 'ip':
-        ip = value
-      elif param == 'interval':
-        interval = int(value)
-      elif param == 'initialTime':
-        savedTime = int(value)
-      elif param == 'reconnectionTime':
-        tryToConnectAfter = int(value)
-      elif param == 'connectionTimeout':
-        connectionTimeout = int(value)
-  except FileNotFoundError:
-    print(f'No file \'{confFilePath}\' exists')
 
-  window.start(False, get, interval * 1000)
-def get():
-  if iterate:
-    global isLocked, connectionError, savedTime, interval, createdInfo, iteration, ip, connectionTimeout, tryToConnectAfter
+  window = w.createBlockInfo()
+  def set_error(error: str, type: str = 'ERROR', time: int = 5, stop_iteration: bool = False, notification: bool = False, notification_type: NoticationType = 'urgent'):
+    global iterate
+    print(f"{type}: {error}")
+    logs.new(f"{type}: {error}")
+    notification and notify(type, error, duration='short', scenario=notification_type)
+    iterate = not stop_iteration
+    stop_iteration and window.remove()
+    sleep(time)
+  
+  def get():
+    if not iterate: return
+    
+    global isLocked, createdInfo, connectionError, savedTime, iteration
     try:
-      addresses = getMac(includeInterfaces)
+      addresses = getMac(config.interfaces)
       if len(addresses) > 0:
         data: dict[str, any] = {}
         if connectionError: 
-          newTime = max(savedTime - interval, 0)
+          newTime = max(savedTime - config.interval, 0)
           data.update({
             'isLocked': newTime <= 0,
             'timeInfo': iteration <= 5 or (newTime < 60 * 5 and newTime > (60 * 5) - 5),
             'remainingSeconds': newTime
           })
-          iteration += interval
+          iteration += config.interval
 
-          if iteration > tryToConnectAfter:
+          if iteration > config.reconnection_time:
             connectionError = False
             iteration = 0
         else:
-          response = requests.get(f'{ip}/api/status/{addresses[0]}', timeout=connectionTimeout * 1000)
+          response = requests.get(f'{config.ip}/api/status/{addresses[0]}', timeout=config.connection_timeout * 1000)
           data = response.json() 
           connectionError = False
           iteration = 0
@@ -139,9 +103,16 @@ def get():
       
     except requests.RequestException as error:
       connectionError = True
-      savedTime -= connectionTimeout
-      setError('Couldn\'t connect to server', 'REQUEST ERROR', notification=True, time=0, notificationType='alarm')
+      savedTime -= config.connection_timeout
+      set_error('Couldn\'t connect to server', 'REQUEST ERROR', notification=True, time=0, notification_type='alarm')
+    except requests.ConnectionError as error:
+      connectionError = True
+      savedTime -= config.connection_timeout
+      set_error(f'Connection error {error}', 'CONNECTION ERROR', notification=True, time=0, notification_type='alarm')
     except Exception as error:
-      setError(error)
+      set_error(error, notification=True, time=0, notification_type='alarm')
 
-init()
+  window.start(False, get, config.interval * 1000)
+
+if __name__ == '__main__':
+  init()
