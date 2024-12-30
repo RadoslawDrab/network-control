@@ -13,7 +13,7 @@ from classes.Arguments import Arguments
 from classes.Config import Config
 from classes.Logs import Logs
 
-NoticationType = enum(urgent='urgent', alarm='alarm')
+NotificationType = enum(urgent='urgent', alarm='alarm')
 
 connection_error: bool = False
 iteration: int = 0
@@ -24,14 +24,15 @@ def init():
   global saved_time
   args = Arguments()
   config = Config(Path(args.path))
-  logs = Logs(Path(config.logs_path), 'network-controller')
+  logs = Logs(Path(config.logs_path), args.name, timestamp_on_create=False)
   
   iterate: bool = True
   saved_time = config.initial_time
-  
+
+  notify('App started', f'Version {config.version}', duration='short')
 
   window = w.create_block_info()
-  def set_error(error: str, type: str = 'ERROR', time: int = 5, stop_iteration: bool = False, notification: bool = False, notification_type: NoticationType = 'urgent'):
+  def set_error(error: str, type: str = 'ERROR', time: int = 5, stop_iteration: bool = False, notification: bool = False, notification_type: NotificationType = 'urgent'):
     global iterate
     print(f"{type}: {error}")
     logs.new(f"{type}: {error}")

@@ -23,7 +23,7 @@ def get_type[T](value: any) -> T:
     return bool(value)
   if re.match(r'^\d+$', value):
     return int(value)
-  if re.match(r'^[0-9.,]+$', value):
+  if re.match(r'^\d*[.,]\d*$', value):
     return float(value)
   if re.match(r'^\[.*\]', value):
     value_list = list(re.split(',', re.sub(r'\[|\]', '', value)))
