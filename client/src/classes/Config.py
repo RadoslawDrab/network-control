@@ -26,11 +26,11 @@ class Config(AppConfig):
       lines = [line.replace('\n', '') for line in file.readlines() if not line.startswith('#')]
       
       for line in lines:
-        splitted = line.split('=')
-        if len(splitted) != 2:
+        split = line.split('=')
+        if len(split) != 2:
           print(f"Can't recognize line: {line}")
           continue
-        setattr(self, splitted[0], get_type(splitted[1]))    
+        setattr(self, split[0], get_type(split[1]))
   def set_default(self) -> None:
     with open(self.__path, 'w') as file:
       values: list[tuple[str, any]] = []
@@ -39,10 +39,10 @@ class Config(AppConfig):
       
       file.write('\n'.join([f'{attr}={value}' for attr, value in values if value is not None]))
   def update(self, **kwargs: any) -> None:
-    with open(self.__path, 'r') as file:
-      current_file_lines = file.readlines()
+    with open(self.__path, 'r') as r:
+      current_file_lines = r.readlines()
 
-      with open(self.__path, 'w') as file:
+      with open(self.__path, 'w') as w:
         lines: list[str] = []
         for key, value in kwargs.items():
           if key not in get_attributes(self): continue
@@ -56,7 +56,7 @@ class Config(AppConfig):
 
             lines.append(re.sub(r'(?<==).*', str(value), line).replace('\n', ''))
         lines = [re.sub('\n','', line) for line in lines if len(line) > 0]
-        file.write('\n'.join(lines))
+        w.write('\n'.join(lines))
 
 
 

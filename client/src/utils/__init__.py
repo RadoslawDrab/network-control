@@ -2,7 +2,7 @@ import threading
 import re
 from typing import Callable, TypeVar
 
-def runInParallel(*fns):
+def run_in_parallel(*fns):
   threads: list[threading.Thread] = []
   # if __name__ == "__main__":
   for fn in fns:
@@ -25,8 +25,8 @@ def get_type[T](value: any) -> T:
     return int(value)
   if re.match(r'^\d*[.,]\d*$', value):
     return float(value)
-  if re.match(r'^\[.*\]', value):
-    value_list = list(re.split(',', re.sub(r'\[|\]', '', value)))
+  if re.match(r'^\[.*]', value):
+    value_list = list(re.split(',', re.sub(r'[\[\]]', '', value)))
     return [get_type(item.strip()) for item in value_list]
   if value == 'None':
     return None

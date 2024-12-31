@@ -32,11 +32,11 @@ def init():
   notify('App started', f'Version {config.version}', duration='short')
 
   window = w.create_block_info()
-  def set_error(error: str, type: str = 'ERROR', time: int = 5, stop_iteration: bool = False, notification: bool = False, notification_type: NotificationType = 'urgent'):
+  def set_error(error: str, status_type: str = 'ERROR', time: int = 5, stop_iteration: bool = False, notification: bool = False, notification_type: NotificationType = 'urgent'):
     global iterate
-    print(f"{type}: {error}")
-    logs.new(f"{type}: {error}")
-    notification and notify(type, error, duration='short', scenario=notification_type)
+    print(f"{status_type}: {error}")
+    logs.new(f"{status_type}: {error}")
+    notification and notify(status_type, error, duration='short', scenario=notification_type)
     iterate = not stop_iteration
     stop_iteration and window.remove()
     sleep(time)
@@ -44,17 +44,17 @@ def init():
   def get():
     if not iterate: return
     
-    global is_locked, created_info, connection_error, saved_time, iteration
+    global created_info, connection_error, saved_time, iteration
     try:
       addresses = get_mac_address(config.interfaces)
       if len(addresses) > 0:
         data: dict[str, any] = {}
         if connection_error: 
-          newTime = max(saved_time - config.interval, 0)
+          new_time = max(saved_time - config.interval, 0)
           data.update({
-            'isLocked': newTime <= 0,
-            'timeInfo': iteration <= 5 or (newTime < 60 * 5 and newTime > (60 * 5) - 5),
-            'remainingSeconds': newTime
+            'isLocked': new_time <= 0,
+            'timeInfo': iteration <= 5 or (60 * 5 > new_time > (60 * 5) - 5),
+            'remainingSeconds': new_time
           })
           iteration += config.interval
 
@@ -68,33 +68,33 @@ def init():
           iteration = 0
 
         is_locked = data.get('isLocked')
-        timeInfo = data.get('timeInfo')
+        time_info = data.get('timeInfo')
         shutdown = data.get('shutdown')
         restart = data.get('restart')
-        remainingSeconds = data.get('remainingSeconds')
-        remainingTime = 0
-        if remainingSeconds != None:
-          remainingTime = floor(remainingSeconds / 60)
-          saved_time = remainingSeconds
+        remaining_seconds = data.get('remainingSeconds')
+        remaining_time = 0
+        if remaining_seconds is not None:
+          remaining_time = floor(remaining_seconds / 60)
+          saved_time = remaining_seconds
 
-        if timeInfo and not created_info:
-          w.create_time_info(remainingTime)
+        if time_info and not created_info:
+          w.create_time_info(remaining_time)
           created_info = True
-        elif not timeInfo and created_info:
+        elif not time_info and created_info:
           created_info = False
 
-        if shutdown == True:
+        if shutdown:
           os.system('shutdown -t 0 -f')
-        if restart == True:
+        if restart:
           os.system('shutdown -t 0 -f -r')
 
-        if is_locked != None: 
+        if is_locked is not None:
           set_keyboard_block(is_locked)
           set_mouse_block(is_locked)
 
           window.set_state(is_locked)
           if not is_locked:
-            print('OFFLINE' if connection_error else 'ONLINE',  remainingSeconds)
+            print('OFFLINE' if connection_error else 'ONLINE',  remaining_seconds)
         else:
           raise Exception(f"MAC address '{addresses[0]}' not registered")
       else:
@@ -110,7 +110,7 @@ def init():
       saved_time -= config.connection_timeout
       set_error(f'Connection error {error}', 'CONNECTION ERROR', notification=True, time=0, notification_type='alarm')
     except Exception as error:
-      set_error(error)
+      set_error(error.__str__())
 
   window.start(False, get, config.interval * 1000)
 

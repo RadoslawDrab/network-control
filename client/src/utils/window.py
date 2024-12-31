@@ -3,7 +3,7 @@ import math
 from win11toast import notify
 from typing import Callable
 
-class Window():
+class Window:
   target: Callable[..., any] = None 
   time: int = 1000
   def __init__(self, name: str):
@@ -16,7 +16,7 @@ class Window():
     self.target = target
     self.time = time
 
-    if target != None:
+    if target is not None:
       self.worker()
 
     self.root.mainloop()
@@ -66,7 +66,7 @@ def create_time_info(minutes: int):
 
   if minutes <= 1:
     note = 'minuta'
-  elif minutes > 1 and minutes < 5:
+  elif 1 < minutes < 5:
     note = 'minuty'
 
   if minutes < 1:
@@ -75,7 +75,7 @@ def create_time_info(minutes: int):
     time = hours
     if hours == 1:
       note = 'godzina'
-    elif hours > 1 and hours < 5:
+    elif 1 < hours < 5:
       note = 'godziny'
     else:
       note = 'godzin' 
