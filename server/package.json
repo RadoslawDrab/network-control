@@ -1,6 +1,5 @@
 {
   "name": "network-control",
-  "version": "0.0.1",
   "description": "Server app for controlling network devices",
   "author": "Radosław Drab",
   "license": "ISC",
@@ -47,6 +46,8 @@
     "vue": "^3.4.35"
   },
   "dependencies": {
+    "esbuild-copy-static-files": "^0.1.0",
+    "ftpd": "^0.2.16",
     "https": "^1.0.0"
   }
 }

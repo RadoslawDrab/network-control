@@ -1,4 +1,5 @@
 import esbuild from 'esbuild';
+import copyPublic from 'esbuild-copy-static-files'
 
 const variables = ['NODE_ENV'];
 const envVariables = Object.keys(process.env)
@@ -13,4 +14,11 @@ await esbuild.build({
   platform: 'node',
   minify: true,
   define: envVariables,
+    plugins: [
+        copyPublic({
+          recursive: true,
+          dest: 'dist/public',
+          src: 'public'
+        })
+    ]
 });
