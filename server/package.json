@@ -7,14 +7,12 @@
   "type": "module",
   "scripts": {
     "start": "dotenvx run -f .env.dev -- concurrently --names=\"SERVER,WATCH\" -c \"auto\" \"npm run start:server\" \"npm run start:app\"",
-    "start2": "dotenvx run -f .env.dev -- concurrently --names=\"SERVER,WATCH\" -c \"auto\" \"npm run start:server\" \"npm run build:app\"",
     "start:app": "vite dev app",
     "start:server": "dotenvx run -f .env.dev -- tsx --watch src/index.ts",
     "prebuild": "shx rm -rf dist/ && npm run type-check",
     "build": "dotenvx run -f .env.prod -- node esbuild.mjs && npm run build:app",
     "build:app": "vite build app",
-    "postbuild": "npm run build-exe && shx rm sea-prep.blob",
-    "build-exe": "node --experimental-sea-config sea-config.json && node -e \"require('fs').copyFileSync(process.execPath, 'dist/index.exe')\" && postject dist/index.exe NODE_SEA_BLOB sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
+    "postbuild": "deno compile --allow-all --no-npm -o dist/network-controller --icon ./dist/app/assets/favicon.ico ./dist/index.cjs",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
@@ -46,6 +44,9 @@
     "vue": "^3.4.35"
   },
   "dependencies": {
+    "@types/argparse": "^2.0.17",
+    "argparse": "^2.0.1",
+    "deno": "^2.1.4",
     "esbuild-copy-static-files": "^0.1.0",
     "ftpd": "^0.2.16",
     "https": "^1.0.0"

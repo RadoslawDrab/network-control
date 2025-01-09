@@ -7,6 +7,7 @@ declare global {
       _ENC_KEY: string;
       _ADMIN_PASSWORD: string;
       _SECURE: boolean;
+      _LOGS_PATH: string;
     }
   }
 }
