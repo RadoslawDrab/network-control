@@ -82,6 +82,13 @@
     "settings.editor.selected.configurable": "settings.sync",
     "ts.external.directory.path": "D:\\scripts\\control\\server\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "GitStage.ChangesTree.GroupingKeys": [
+      "directory",
+      "module",
+      "repository"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
@@ -168,7 +175,7 @@
       <workItem from="1735540657540" duration="3826000" />
       <workItem from="1736325434525" duration="7286000" />
       <workItem from="1736417707225" duration="5690000" />
-      <workItem from="1736429129066" duration="5376000" />
+      <workItem from="1736429129066" duration="5974000" />
     </task>
     <task id="LOCAL-00001" summary="added releases">
       <option name="closed" value="true" />
@@ -178,7 +185,31 @@
       <option name="project" value="LOCAL" />
       <updated>1735298161183</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="added config path and option not to encrypt">
+      <option name="closed" value="true" />
+      <created>1736435069407</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1736435069407</updated>
+    </task>
+    <task id="LOCAL-00003" summary="added fixed origin error in production">
+      <option name="closed" value="true" />
+      <created>1736435113050</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1736435113050</updated>
+    </task>
+    <task id="LOCAL-00004" summary="added fixed origin error in production">
+      <option name="closed" value="true" />
+      <created>1736435130619</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1736435130619</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -187,6 +218,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="added releases" />
     <MESSAGE value="added release" />
-    <option name="LAST_COMMIT_MESSAGE" value="added release" />
+    <MESSAGE value="added config path and option not to encrypt" />
+    <MESSAGE value="added fixed origin error in production" />
+    <option name="LAST_COMMIT_MESSAGE" value="added fixed origin error in production" />
   </component>
 </project>
