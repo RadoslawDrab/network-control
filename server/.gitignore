@@ -2,3 +2,4 @@
 dist/
 sea-prep.blob
 .env.*
+/data
