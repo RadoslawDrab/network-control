@@ -114,10 +114,10 @@ export function checkTokenValidity(
   }
 }
 export function checkOrigin(this: boolean, req: express.Request, res: express.Response, next: express.NextFunction) {
-  const requestOrigin = PRODUCTION ? req.headers.host : req.headers.origin;
+  const requestOrigin = PRODUCTION ? req.ip : req.headers.origin;
   const isOrigin = origin.some((o) => requestOrigin && o.includes(requestOrigin));
 
-  if (this === true) return isOrigin;
+  if (this) return isOrigin;
 
   if (isOrigin) {
     next();
