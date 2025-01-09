@@ -12,14 +12,14 @@ export class Config<T extends ConfigType> {
   private fileName: string;
   path: string;
   private dir: string;
-  private key: string;
+  private key: string | null;
   private defaultData: MaybePartial<T>;
-  constructor(fileName: string, data: MaybePartial<T>, key: string) {
+  constructor(fileName: string, data: MaybePartial<T>, key: string | null = null, configPath: string | null = null) {
     const isProduction = process.env.NODE_ENV === 'production';
 
     this.name = fileName.replace(/\..*$/, '');
     this.fileName = this.name + '.conf';
-    this.dir = path.resolve(isProduction ? './' : './node_modules/.temp');
+    this.dir = configPath || path.resolve(isProduction ? './' : './node_modules/.temp');
     this.path = path.resolve(this.dir, this.fileName);
     this.key = key;
     this.restartRequired = false;
@@ -87,12 +87,15 @@ export class Config<T extends ConfigType> {
     );
   }
   private encrypt(data: MaybePartial<T>): string {
+    if (!this.key) return JSON.stringify(data);
     return crypto.AES.encrypt(JSON.stringify(data), this.key).toString();
   }
   private decrypt(): MaybePartial<T> {
     if (this.configExists()) {
       try {
         const str = fs.readFileSync(this.path).toString();
+        if (!this.key) return str ? JSON.parse(str) : {}
+
         return str ? (JSON.parse(crypto.AES.decrypt(str, this.key).toString(crypto.enc.Utf8)) as T) : {};
       } catch (error) {
         return this.defaultData;
