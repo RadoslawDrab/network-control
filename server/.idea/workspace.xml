@@ -64,60 +64,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Node.js.run build.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Shell Script.copy configuration.executor": "Run",
-    "git-widget-placeholder": "dev",
-    "last_opened_file_path": "D:/scripts/control/server/dist/index.cjs",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "npm.build.executor": "Run",
-    "npm.start.executor": "Run",
-    "settings.editor.selected.configurable": "settings.sync",
-    "ts.external.directory.path": "D:\\scripts\\control\\server\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
-  },
-  "keyToStringList": {
-    "GitStage.ChangesTree.GroupingKeys": [
-      "directory",
-      "module",
-      "repository"
-    ]
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.build.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;D:\\scripts\\control\\server\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\scripts\control\server\public" />
       <recent name="D:\scripts\control\server" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.copy configuration">
-    <configuration name="run build" type="NodeJSConfigurationType" path-to-js-file="index.cjs" working-dir="$PROJECT_DIR$/dist">
-      <method v="2" />
-    </configuration>
-    <configuration name="copy configuration" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="cp data/*.conf ./dist" />
-      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
-      <option name="SCRIPT_PATH" value="cp" />
-      <option name="SCRIPT_OPTIONS" value="" />
-      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
-      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
-      <option name="INTERPRETER_PATH" value="powershell.exe" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="EXECUTE_IN_TERMINAL" value="true" />
-      <option name="EXECUTE_SCRIPT_FILE" value="false" />
-      <envs />
-      <method v="2">
-        <option name="RunConfigurationTask" enabled="true" run_configuration_name="build" run_configuration_type="js.build_tools.npm" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="npm.build">
     <configuration name="build" type="js.build_tools.npm" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
@@ -149,11 +117,9 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Node.js.run build" />
       <item itemvalue="npm.start" />
       <item itemvalue="npm.build" />
       <item itemvalue="npm.type-check" />
-      <item itemvalue="Shell Script.copy configuration" />
     </list>
   </component>
   <component name="SharedIndexes">
@@ -173,9 +139,6 @@
       <updated>1735294272838</updated>
       <workItem from="1735294274606" duration="7829000" />
       <workItem from="1735540657540" duration="3826000" />
-      <workItem from="1736325434525" duration="7286000" />
-      <workItem from="1736417707225" duration="5690000" />
-      <workItem from="1736429129066" duration="5974000" />
     </task>
     <task id="LOCAL-00001" summary="added releases">
       <option name="closed" value="true" />
@@ -185,31 +148,7 @@
       <option name="project" value="LOCAL" />
       <updated>1735298161183</updated>
     </task>
-    <task id="LOCAL-00002" summary="added config path and option not to encrypt">
-      <option name="closed" value="true" />
-      <created>1736435069407</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1736435069407</updated>
-    </task>
-    <task id="LOCAL-00003" summary="added fixed origin error in production">
-      <option name="closed" value="true" />
-      <created>1736435113050</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1736435113050</updated>
-    </task>
-    <task id="LOCAL-00004" summary="added fixed origin error in production">
-      <option name="closed" value="true" />
-      <created>1736435130619</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1736435130619</updated>
-    </task>
-    <option name="localTasksCounter" value="5" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -218,8 +157,6 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="added releases" />
     <MESSAGE value="added release" />
-    <MESSAGE value="added config path and option not to encrypt" />
-    <MESSAGE value="added fixed origin error in production" />
-    <option name="LAST_COMMIT_MESSAGE" value="added fixed origin error in production" />
+    <option name="LAST_COMMIT_MESSAGE" value="added release" />
   </component>
 </project>

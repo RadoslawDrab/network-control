@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "start": "dotenvx run -f .env.dev -- concurrently --names=\"SERVER,WATCH\" -c \"auto\" \"npm run start:server\" \"npm run start:app\"",
+    "start2": "dotenvx run -f .env.dev -- concurrently --names=\"SERVER,WATCH\" -c \"auto\" \"npm run start:server\" \"npm run build:app\"",
     "start:app": "vite dev app",
     "start:server": "dotenvx run -f .env.dev -- tsx --watch src/index.ts",
     "prebuild": "shx rm -rf dist/ && npm run type-check",
